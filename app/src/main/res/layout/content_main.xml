@@ -14,7 +14,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#ffffff" />
 
     <TextView
@@ -78,7 +77,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/activity_horizontal_margin"
-        android:textAppearance="?android:attr/textAppearanceMedium"
         android:id="@+id/textview_SerialNumber"
         android:layout_below="@+id/textview_statusUpdate"
         android:layout_centerHorizontal="true" />

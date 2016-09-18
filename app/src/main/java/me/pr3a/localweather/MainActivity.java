@@ -116,7 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             serialNumber.setText("SerialNumber : " + SerialNumber);
 
             TextView statusUpdate = (TextView) findViewById(R.id.textview_statusUpdate);
-            statusUpdate.setText("\t\t\t\t\t  Last update \n" + updated_at);
+            statusUpdate.setText("Last update " + updated_at);
 
             TextView weatherTemp = (TextView) findViewById(R.id.weather_temperature);
             weatherTemp.setText(temp + " ℃");
