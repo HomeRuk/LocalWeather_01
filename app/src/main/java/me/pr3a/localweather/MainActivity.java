@@ -1,6 +1,10 @@
 package me.pr3a.localweather;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Typeface;
+import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -22,24 +26,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     ActionBarDrawerToggle drawerToggle;
     TextView weatherIcon;
     Typeface weatherFont;
+    String url = "http://128.199.210.91/weather";
+    final UrlApi uriapi01 = new UrlApi();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         //set fond
         weatherFont = Typeface.createFromAsset(getAssets(), "fonts/weather.ttf");
         weatherIcon = (TextView) findViewById(R.id.weather_icon);
@@ -51,18 +56,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        String url = "http://128.199.210.91/weather";
-        final UrlApi uriapi01 = new UrlApi();
+        //set url
         uriapi01.setUri(url);
-        Timer timer = new Timer();
-        TimerTask tasknew = new TimerTask() {
-            public void run() {
-                LoadJSON task = new LoadJSON();
-                task.execute(uriapi01.getUrl());
-            }
-        };
-        timer.scheduleAtFixedRate(tasknew, 5 * 100, 360 * 1000);
 
+        // Connect loadJson choice 1 setTime
+        this.conLoadJSON(1);
     }
 
     private class UrlApi {
@@ -86,7 +84,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(String result) {
-
             String temp = "";
             String humidity = "";
             String dewpoint = "";
@@ -96,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String updated_at = "";
             String icon ;
             String SerialNumber ="";
+            double tempDouble = 0;
+
             try {
                 JSONObject json = new JSONObject(result);
 
@@ -133,17 +132,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             TextView weatherLight = (TextView) findViewById(R.id.weather_light);
             weatherLight.setText("Light: " + light);
 
-            double tempdouble = Double.parseDouble(temp);
+            tempDouble = Double.parseDouble(temp);
 
-            if(tempdouble >=35.0){
+            if(tempDouble >=35.0){
                 icon = getString(R.string.weather_hot);
                 weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
                 weatherIcon.setText(icon);
-            }else if(tempdouble>=18.1){
+            }else if(tempDouble>=18.1){
                 icon = getString(R.string.weather_sunny);
                 weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
                 weatherIcon.setText(icon);
-            }else if(tempdouble <=18){
+            }else if(tempDouble <=18){
                 icon = getString(R.string.weather_cold);
                 weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 200);
                 weatherIcon.setText(icon);
@@ -153,16 +152,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private String getText(String strUrl) {
         String strResult = "";
-        try {
-            URL url = new URL(strUrl);
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            strResult = readStream(con.getInputStream());
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(isNetworkConnected()) {
+            try {
+                URL url = new URL(strUrl);
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                strResult = readStream(con.getInputStream());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }else{
+            showProblemDialog("Not Connected Network");
         }
         return strResult;
     }
 
+    // Read text json first to last
     private String readStream(InputStream in) {
         BufferedReader reader = null;
         StringBuilder sb = new StringBuilder();
@@ -184,6 +188,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
         return sb.toString();
+    }
+
+    // connect Load Json
+    private void conLoadJSON(int choice){
+        // Check Network Connected
+            if(isNetworkConnected()){
+                // choice 1 setTime
+                if(choice == 1) {
+                    Timer timer = new Timer();
+                    TimerTask tasknew = new TimerTask() {
+                        public void run() {
+                            LoadJSON task = new LoadJSON();
+                            task.execute(uriapi01.getUrl());
+                        }
+                    };
+                    timer.scheduleAtFixedRate(tasknew, 5 * 100, 300 * 1000);
+                }else
+                    new LoadJSON().execute(uriapi01.getUrl());
+            }else{
+                showProblemDialog("Not Connected Network");
+            }
+    }
+
+    // ShoeAlertProblemDialog
+    private void showProblemDialog(String message){
+        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
+        dialog.setTitle("Problem");
+        dialog.setIcon(R.mipmap.ic_launcher);
+        dialog.setCancelable(true);
+        dialog.setMessage(message);
+        dialog.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        dialog.show();
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
     }
 
     private void initToolbar() {
@@ -220,14 +266,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        String url = "http://128.199.210.91/weather";
-        final UrlApi uriapi01 = new UrlApi();
-        uriapi01.setUri(url);
 
         if (id == R.id.action_refresh) {
-            LoadJSON task = new LoadJSON();
-            task.execute(uriapi01.getUrl());
-            return true;
+            conLoadJSON(0);
+            //new LoadJSON().execute(uriapi01.getUrl());
         }
 
         return super.onOptionsItemSelected(item);
