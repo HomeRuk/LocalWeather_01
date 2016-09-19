@@ -6,10 +6,12 @@
 
     <!-- Icon weather -->
     <string name="weather_sunny">&#xf00d;</string>
-    <string name="weather_rain">&#xf008;</string>
+    <string name="weather_rain">&#xf019;</string>
     <string name="weather_cold">&#xf076;</string>
-    <string name="weather_hot">&#xf072;</string>
+    <string name="weather_hot">&#xf0c7;</string>
+    <string name="weather_clear_night">&#xf02e;</string>
 
+    <string name="Problem">!!!</string>
 
     <!-- textview -->
     <string name="text_update">Last update</string>

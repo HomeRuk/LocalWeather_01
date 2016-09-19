@@ -91,10 +91,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             String light = "";
             String rain = "";
             String updated_at = "";
-            String icon ;
-            String SerialNumber ="";
+            String icon;
+            String SerialNumber = "";
             double tempDouble = 0;
-
+            int rainInt = -1;
             try {
                 JSONObject json = new JSONObject(result);
 
@@ -133,26 +133,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             weatherLight.setText("Light: " + light);
 
             tempDouble = Double.parseDouble(temp);
+            rainInt = Integer.parseInt(rain);
 
-            if(tempDouble >=35.0){
-                icon = getString(R.string.weather_hot);
-                weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
+            if (rainInt == 1) {
+                icon = getString(R.string.weather_rain);
+                //7weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
                 weatherIcon.setText(icon);
-            }else if(tempDouble>=18.1){
-                icon = getString(R.string.weather_sunny);
-                weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
-                weatherIcon.setText(icon);
-            }else if(tempDouble <=18){
-                icon = getString(R.string.weather_cold);
-                weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 200);
-                weatherIcon.setText(icon);
+            } else {
+                if (tempDouble >= 35.0) {
+                    icon = getString(R.string.weather_hot);
+                    //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
+                    weatherIcon.setText(icon);
+                } else if (tempDouble >= 18.1) {
+                    icon = getString(R.string.weather_sunny);
+                    //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
+                    weatherIcon.setText(icon);
+                } else if (tempDouble <= 18) {
+                    icon = getString(R.string.weather_cold);
+                    //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
+                    weatherIcon.setText(icon);
+                }
             }
         }
     }
 
     private String getText(String strUrl) {
         String strResult = "";
-        if(isNetworkConnected()) {
+        if (isNetworkConnected()) {
             try {
                 URL url = new URL(strUrl);
                 HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -160,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }else{
+        } else {
             showProblemDialog("Not Connected Network");
         }
         return strResult;
@@ -191,28 +198,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // connect Load Json
-    private void conLoadJSON(int choice){
+    private void conLoadJSON(int choice) {
         // Check Network Connected
-            if(isNetworkConnected()){
-                // choice 1 setTime
-                if(choice == 1) {
-                    Timer timer = new Timer();
-                    TimerTask tasknew = new TimerTask() {
-                        public void run() {
-                            LoadJSON task = new LoadJSON();
-                            task.execute(uriapi01.getUrl());
-                        }
-                    };
-                    timer.scheduleAtFixedRate(tasknew, 5 * 100, 300 * 1000);
-                }else
-                    new LoadJSON().execute(uriapi01.getUrl());
-            }else{
-                showProblemDialog("Not Connected Network");
-            }
+        if (isNetworkConnected()) {
+            // choice 1 setTime
+            if (choice == 1) {
+                Timer timer = new Timer();
+                TimerTask tasknew = new TimerTask() {
+                    public void run() {
+                        LoadJSON task = new LoadJSON();
+                        task.execute(uriapi01.getUrl());
+                    }
+                };
+                timer.scheduleAtFixedRate(tasknew, 5 * 100, 300 * 1000);
+            } else
+                new LoadJSON().execute(uriapi01.getUrl());
+        } else {
+            showProblemDialog("Not Connected Network");
+            String icon = getString(R.string.Problem);
+            weatherIcon.setText(icon);
+        }
     }
 
     // ShoeAlertProblemDialog
-    private void showProblemDialog(String message){
+    private void showProblemDialog(String message) {
         AlertDialog.Builder dialog = new AlertDialog.Builder(this);
         dialog.setTitle("Problem");
         dialog.setIcon(R.mipmap.ic_launcher);
