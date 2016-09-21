@@ -3,36 +3,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/textview_statusUpdate"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:textColor="#ffffff" />
-
-    <TextView
         android:id="@+id/weather_icon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:textColor="#ffffff"
-        android:textSize="150sp"/>
+        android:layout_marginTop="60dp"
+        android:textColor="@color/colorTextBase"
+        android:textSize="150sp" />
+
+    <TextView
+        android:id="@+id/weather_statusName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/weather_icon"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorTextBase"
+        android:text="Sunny"
+        android:textSize="30sp" />
 
     <TextView
         android:id="@+id/weather_temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/weather_icon"
+        android:layout_below="@+id/weather_statusName"
         android:layout_centerHorizontal="true"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#ffffff"
+        android:textColor="@color/colorTextBase"
         android:textSize="40sp" />
 
     <TextView
@@ -41,9 +42,9 @@
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/weather_temperature"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#ffffff"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"/>
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:textSize="18sp"
+        android:textColor="@color/colorTextBase" />
 
     <TextView
         android:id="@+id/weather_pressure"
@@ -51,20 +52,18 @@
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_below="@+id/weather_temperature"
-        android:layout_marginLeft="@dimen/activity_horizontal_margin"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#ffffff"
-        android:layout_marginTop="@dimen/activity_horizontal_margin"/>
+        android:layout_marginTop="@dimen/activity_horizontal_margin"
+        android:textSize="18sp"
+        android:textColor="@color/colorTextBase" />
 
     <TextView
         android:id="@+id/weather_dewpoint"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/weather_humidity"
         android:layout_below="@+id/weather_humidity"
         android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#ffffff" />
+        android:textSize="18sp"
+        android:textColor="@color/colorTextBase" />
 
     <TextView
         android:id="@+id/weather_light"
@@ -73,9 +72,10 @@
         android:layout_alignLeft="@+id/weather_pressure"
         android:layout_below="@+id/weather_pressure"
         android:layout_marginTop="@dimen/activity_horizontal_margin"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#ffffff" />
+        android:textSize="18sp"
+        android:textColor="@color/colorTextBase" />
 
+    <!--
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -83,6 +83,13 @@
         android:id="@+id/textview_SerialNumber"
         android:layout_below="@+id/textview_statusUpdate"
         android:layout_centerHorizontal="true" />
+        -->
 
-
+    <TextView
+        android:id="@+id/textview_statusUpdate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorTextName" />
 </RelativeLayout>

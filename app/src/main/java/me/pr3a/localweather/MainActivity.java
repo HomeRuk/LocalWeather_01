@@ -26,27 +26,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import me.pr3a.localweather.Server.UrlApi;
+
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    Toolbar toolbar;
-    DrawerLayout drawerLayout;
-    ActionBarDrawerToggle drawerToggle;
-    TextView weatherIcon;
-    Typeface weatherFont;
-    String url = "http://128.199.210.91/weather";
-    final UrlApi uriapi01 = new UrlApi();
+    private Toolbar toolbar;
+    private ActionBarDrawerToggle drawerToggle;
+    private TextView weatherIcon;
+    private final String url = "http://128.199.210.91/weather";
+    private UrlApi urlApi = new UrlApi();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //set fond
-        weatherFont = Typeface.createFromAsset(getAssets(), "fonts/weather.ttf");
+        Typeface weatherFont = Typeface.createFromAsset(getAssets(), "fonts/weather.ttf");
         weatherIcon = (TextView) findViewById(R.id.weather_icon);
         weatherIcon.setTypeface(weatherFont);
 
@@ -57,144 +56,52 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         //set url
-        uriapi01.setUri(url);
+        urlApi.setUri(url);
 
         // Connect loadJson choice 1 setTime
         this.conLoadJSON(1);
     }
 
-    private class UrlApi {
-        protected String url;
-
-        protected void setUri(String url) {
-            this.url = url;
-        }
-
-        protected String getUrl() {
-            return url;
-        }
+    @Override
+    public void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        drawerToggle.syncState();
     }
 
-    private class LoadJSON extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... urls) {
-            return getText(urls[0]);
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            String temp = "";
-            String humidity = "";
-            String dewpoint = "";
-            String pressure = "";
-            String light = "";
-            String rain = "";
-            String updated_at = "";
-            String icon;
-            String SerialNumber = "";
-            double tempDouble = 0;
-            int rainInt = -1;
-            try {
-                JSONObject json = new JSONObject(result);
-
-                temp += String.format("%s", json.getString("temp"));
-                humidity += String.format("%s", json.getString("humidity"));
-                dewpoint += String.format("%s", json.getString("dewpoint"));
-                pressure += String.format("%s", json.getString("pressure"));
-                light += String.format("%s", json.getString("light"));
-                rain += String.format("%s", json.getString("rain"));
-                updated_at += String.format("%s", json.getString("updated_at"));
-                SerialNumber += String.format("%s", json.getString("SerialNumber"));
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-            TextView serialNumber = (TextView) findViewById(R.id.textview_SerialNumber);
-            serialNumber.setText("SerialNumber : " + SerialNumber);
-
-            TextView statusUpdate = (TextView) findViewById(R.id.textview_statusUpdate);
-            statusUpdate.setText("Last update " + updated_at);
-
-            TextView weatherTemp = (TextView) findViewById(R.id.weather_temperature);
-            weatherTemp.setText(temp + " ℃");
-
-            TextView weatherHumidity = (TextView) findViewById(R.id.weather_humidity);
-            weatherHumidity.setText("Humidity: " + humidity + " %");
-
-            TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
-            weatherPressure.setText("Pressure: " + pressure);
-
-            TextView weatherDewpoint = (TextView) findViewById(R.id.weather_dewpoint);
-            weatherDewpoint.setText("DewPoint: " + dewpoint + " ℃");
-
-            TextView weatherLight = (TextView) findViewById(R.id.weather_light);
-            weatherLight.setText("Light: " + light);
-
-            tempDouble = Double.parseDouble(temp);
-            rainInt = Integer.parseInt(rain);
-
-            if (rainInt == 1) {
-                icon = getString(R.string.weather_rain);
-                //7weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
-                weatherIcon.setText(icon);
-            } else {
-                if (tempDouble >= 35.0) {
-                    icon = getString(R.string.weather_hot);
-                    //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
-                    weatherIcon.setText(icon);
-                } else if (tempDouble >= 18.1) {
-                    icon = getString(R.string.weather_sunny);
-                    //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
-                    weatherIcon.setText(icon);
-                } else if (tempDouble <= 18) {
-                    icon = getString(R.string.weather_cold);
-                    //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
-                    weatherIcon.setText(icon);
-                }
-            }
-        }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.activity_main_toolbar, menu);
+        return true;
     }
 
-    private String getText(String strUrl) {
-        String strResult = "";
-        if (isNetworkConnected()) {
-            try {
-                URL url = new URL(strUrl);
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                strResult = readStream(con.getInputStream());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        } else {
-            showProblemDialog("Not Connected Network");
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            conLoadJSON(0);
         }
-        return strResult;
+        return super.onOptionsItemSelected(item);
     }
 
-    // Read text json first to last
-    private String readStream(InputStream in) {
-        BufferedReader reader = null;
-        StringBuilder sb = new StringBuilder();
-        try {
-            reader = new BufferedReader(new InputStreamReader(in));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line + "\n");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.nav_profile:
+                break;
+            case R.id.nav_setting:
+                break;
+            default:
+                break;
         }
-        return sb.toString();
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     // connect Load Json
@@ -206,17 +113,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Timer timer = new Timer();
                 TimerTask tasknew = new TimerTask() {
                     public void run() {
-                        LoadJSON task = new LoadJSON();
-                        task.execute(uriapi01.getUrl());
+                        new LoadJSON().execute(urlApi.getUrl());
                     }
                 };
                 timer.scheduleAtFixedRate(tasknew, 5 * 100, 300 * 1000);
             } else
-                new LoadJSON().execute(uriapi01.getUrl());
+                new LoadJSON().execute(urlApi.getUrl());
         } else {
             showProblemDialog("Not Connected Network");
-            String icon = getString(R.string.Problem);
-            weatherIcon.setText(icon);
         }
     }
 
@@ -237,7 +141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-
         return cm.getActiveNetworkInfo() != null;
     }
 
@@ -249,66 +152,137 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initInstances() {
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(drawerToggle);
         //drawerToggle.syncState();
     }
 
-    @Override
-    public void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        drawerToggle.syncState();
-    }
+    private class LoadJSON extends AsyncTask<String, Void, String> {
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_main_toolbar, menu);
-        return true;
-    }
+        private TextView statusUpdate = (TextView) findViewById(R.id.textview_statusUpdate);
+        private TextView weatherTemp = (TextView) findViewById(R.id.weather_temperature);
+        private TextView weatherHumidity = (TextView) findViewById(R.id.weather_humidity);
+        private TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
+        private TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
+        private TextView weatherLight = (TextView) findViewById(R.id.weather_light);
+        private String temp = "";
+        private String humidity = "";
+        private String dewPoint = "";
+        private String pressure = "";
+        private String light = "";
+        private String rain = "";
+        private String updated_at = "";
+        private String icon;
+        private double tempDouble;
+        private int rainInt, timeInt;
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
-
-        if (id == R.id.action_refresh) {
-            conLoadJSON(0);
-            //new LoadJSON().execute(uriapi01.getUrl());
+        @Override
+        protected String doInBackground(String... urls) {
+            String strResult = "";
+            if (isNetworkConnected()) {
+                try {
+                    URL url = new URL(urls[0]);
+                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                    strResult = readStream(con.getInputStream());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                showProblemDialog("Not Connected Network");
+            }
+            return strResult;
         }
 
-        return super.onOptionsItemSelected(item);
-    }
+        @Override
+        protected void onPostExecute(String result) {
+            try {
+                JSONObject json = new JSONObject(result);
+                temp += String.format("%s", json.getString("temp"));
+                humidity += String.format("%s", json.getString("humidity"));
+                dewPoint += String.format("%s", json.getString("dewpoint"));
+                pressure += String.format("%s", json.getString("pressure"));
+                light += String.format("%s", json.getString("light"));
+                rain += String.format("%s", json.getString("rain"));
+                updated_at += String.format("%s", json.getString("updated_at"));
+                String time = updated_at.substring(11, 13);
+                try {
+                    tempDouble = Double.parseDouble(temp);
+                    rainInt = Integer.parseInt(rain);
+                    timeInt = Integer.parseInt(time);
+                    if (rainInt == 1) {
+                        if (timeInt >= 6 && timeInt < 18) {
+                            icon = getString(R.string.weather_day_rain);
+                            weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 120);
+                            weatherIcon.setText(icon);
+                        } else {
+                            icon = getString(R.string.weather_night_rain);
+                            weatherIcon.setText(icon);
+                        }
+                    } else if (tempDouble >= 35.0) {
+                        icon = getString(R.string.weather_hot);
+                        weatherIcon.setText(icon);
+                    } else if (tempDouble > 22.9) {
+                        if (timeInt >= 6 && timeInt < 18) {
+                            icon = getString(R.string.weather_sunny);
+                            weatherIcon.setText(icon);
+                        } else {
+                            icon = getString(R.string.weather_night_clear);
+                            weatherIcon.setText(icon);
+                        }
+                    } else if (tempDouble <= 22.9) {
+                        icon = getString(R.string.weather_cold);
+                        //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
+                        weatherIcon.setText(icon);
+                    }
 
+                    statusUpdate.setText(String.format("Last update %s", updated_at));
+                    weatherTemp.setText(String.format("%s ℃", tempDouble));
+                    weatherHumidity.setText(String.format("Humidity: %s %%", humidity));
+                    weatherPressure.setText(String.format("Pressure: %s", pressure));
+                    weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
+                    weatherLight.setText(String.format("Light: %s", light));
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
-        // Handle navigation view item clicks here.
-        int id = item.getItemId();
-        String icon;
+                } catch (NumberFormatException e) {
+                    showProblemDialog("Connect Server fail \n"
+                            + "Please check Internet");
+                    e.printStackTrace();
+                }
+            } catch (JSONException e) {
+                showProblemDialog("Connect Server fail \n"
+                        + "Please check Internet");
+                e.printStackTrace();
+            } catch (Exception e) {
+                showProblemDialog("Program Stop");
+                e.printStackTrace();
+            }
 
-        switch (id) {
-            case R.id.nav_profile:
-                /*icon = getString(R.string.weather_cold);
-                weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
-                weatherIcon.setText(icon);*/
-                break;
-            case R.id.nav_setting:
-                /*icon = getString(R.string.weather_hot);
-                weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
-                weatherIcon.setText(icon);*/
-                break;
-            default:
-                break;
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+        // Read text json first to last
+        private String readStream(InputStream in) {
+            BufferedReader reader = null;
+            StringBuilder sb = new StringBuilder();
+            try {
+                reader = new BufferedReader(new InputStreamReader(in));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    //sb.append(line + "\n");
+                    sb.append(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return sb.toString();
+        }
     }
 }

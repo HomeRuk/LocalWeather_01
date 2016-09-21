@@ -8,7 +8,7 @@
             android:title="โปรไฟล์" />
         <item
             android:id="@+id/nav_setting"
-            android:title="ตั้งค่าแอป"
-            android:icon="@drawable/ic_settings_black_24dp" />
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="ตั้งค่าแอป" />
     </group>
 </menu>
