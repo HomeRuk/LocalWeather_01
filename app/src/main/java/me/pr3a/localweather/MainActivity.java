@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     e.printStackTrace();
                 }
             } catch (JSONException e) {
-                showProblemDialog("Not fount Data\n");
+                showProblemDialog("Data Not fount \n");
                 e.printStackTrace();
             } catch (Exception e) {
                 showProblemDialog("Program Stop");
