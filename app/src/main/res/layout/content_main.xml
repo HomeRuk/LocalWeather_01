@@ -24,7 +24,6 @@
         android:layout_below="@+id/weather_icon"
         android:layout_centerHorizontal="true"
         android:textColor="@color/colorTextBase"
-        android:text="Sunny"
         android:textSize="30sp" />
 
     <TextView

@@ -161,11 +161,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private class LoadJSON extends AsyncTask<String, Void, String> {
 
         private TextView statusUpdate = (TextView) findViewById(R.id.textview_statusUpdate);
+        private TextView weatherStatusName = (TextView) findViewById(R.id.weather_statusName);
         private TextView weatherTemp = (TextView) findViewById(R.id.weather_temperature);
         private TextView weatherHumidity = (TextView) findViewById(R.id.weather_humidity);
         private TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
         private TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
         private TextView weatherLight = (TextView) findViewById(R.id.weather_light);
+
         private String temp = "";
         private String humidity = "";
         private String dewPoint = "";
@@ -216,25 +218,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             icon = getString(R.string.weather_day_rain);
                             weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 120);
                             weatherIcon.setText(icon);
+                            weatherStatusName.setText(R.string.Text_Daytime_Rain);
                         } else {
                             icon = getString(R.string.weather_night_rain);
                             weatherIcon.setText(icon);
+                            weatherStatusName.setText(R.string.Text_Nighttime_Rain);
                         }
                     } else if (tempDouble >= 35.0) {
                         icon = getString(R.string.weather_hot);
                         weatherIcon.setText(icon);
+                        weatherStatusName.setText(R.string.Text_hot);
                     } else if (tempDouble > 22.9) {
                         if (timeInt >= 6 && timeInt < 18) {
                             icon = getString(R.string.weather_sunny);
                             weatherIcon.setText(icon);
+                            weatherStatusName.setText(R.string.Text_Daytime_Neutral);
                         } else {
                             icon = getString(R.string.weather_night_clear);
                             weatherIcon.setText(icon);
+                            weatherStatusName.setText(R.string.Text_Nighttime_Neutral);
                         }
                     } else if (tempDouble <= 22.9) {
                         icon = getString(R.string.weather_cold);
-                        //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 150);
                         weatherIcon.setText(icon);
+                        weatherStatusName.setText(R.string.Text_cold);
                     }
 
                     statusUpdate.setText(String.format("Last update %s", updated_at));
@@ -245,13 +252,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     weatherLight.setText(String.format("Light: %s", light));
 
                 } catch (NumberFormatException e) {
-                    showProblemDialog("Connect Server fail \n"
-                            + "Please check Internet");
+                    showProblemDialog("Connect Server fail");
                     e.printStackTrace();
                 }
             } catch (JSONException e) {
-                showProblemDialog("Connect Server fail \n"
-                        + "Please check Internet");
+                showProblemDialog("Not fount Data\n");
                 e.printStackTrace();
             } catch (Exception e) {
                 showProblemDialog("Program Stop");

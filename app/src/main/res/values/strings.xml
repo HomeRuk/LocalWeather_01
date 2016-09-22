@@ -17,4 +17,10 @@
 
     <!-- textview -->
     <string name="text_update">Last update</string>
+    <string name="Text_Daytime_Rain">Daytime Rain</string>
+    <string name="Text_Daytime_Neutral">Daytime Neutral</string>
+    <string name="Text_Nighttime_Rain">Nighttime Rain</string>
+    <string name="Text_Nighttime_Neutral">Nighttime Neutral</string>
+    <string name="Text_hot">Hot</string>
+    <string name="Text_cold">Cold</string>
 </resources>
