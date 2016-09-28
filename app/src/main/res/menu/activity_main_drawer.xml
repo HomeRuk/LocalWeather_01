@@ -3,12 +3,20 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_main"
+            android:icon="@drawable/ic_home_black_24dp"
+            android:title="Main" />
+        <item
             android:id="@+id/nav_profile"
             android:icon="@drawable/ic_account_box_black_24dp"
-            android:title="โปรไฟล์" />
+            android:title="Profile" />
+        <item
+            android:id="@+id/nav_location"
+            android:icon="@drawable/ic_my_location_black_24dp"
+            android:title="location" />
         <item
             android:id="@+id/nav_setting"
             android:icon="@drawable/ic_settings_black_24dp"
-            android:title="ตั้งค่าแอป" />
+            android:title="Setting" />
     </group>
 </menu>

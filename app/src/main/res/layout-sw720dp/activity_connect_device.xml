@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="560dp"
+        android:background="@color/colorTextBase"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:text="@string/login_title"
+            android:textColor="@color/colorPrimary"
+            android:textSize="64sp" />
+
+        <EditText
+            android:id="@+id/serial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/SerialNumber_title"
+            android:maxLines="1"
+            android:padding="32dp"
+            android:singleLine="true"
+            android:inputType="text"
+            android:textSize="32sp"/>
+
+        <Button
+            android:id="@+id/button_connect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="64dp"
+            android:padding="18dp"
+            android:background="@color/colorPrimaryDark"
+            android:text="@string/button_connect"
+            android:textColor="@color/colorTextBase"
+            android:textSize="36sp" />
+
+    </LinearLayout>
+
+
+</RelativeLayout>

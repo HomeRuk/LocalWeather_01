@@ -1,11 +1,11 @@
 package me.pr3a.localweather;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -30,20 +31,59 @@ import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import me.pr3a.localweather.Server.UrlApi;
+import me.pr3a.localweather.Helper.MyAlertDialog;
+import me.pr3a.localweather.Helper.UrlApi;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar toolbar;
     private ActionBarDrawerToggle drawerToggle;
     private TextView weatherIcon;
-    private final String url = "http://128.199.210.91/weather";
+    private final static String url = "http://128.199.210.91/weather/";
     private UrlApi urlApi = new UrlApi();
-
+    private MyAlertDialog dialog = new MyAlertDialog();
+    private String DataSerialNumber;
+    // Event onStop
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("APP", "onDestroy");
+    }
+
+    // Event onStop
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d("APP", "onStop");
+    }
+
+    // Event onResume
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("APP", "onResume");
+    }
+
+    // Event onPause
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d("APP", "onPause");
+    }
+
+    // Event onStart
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d("APP", "onStart");
+    }
+
+    // Event onCreate
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d("APP", "OnCreate");
         //set fond
         Typeface weatherFont = Typeface.createFromAsset(getAssets(), "fonts/weather.ttf");
         weatherIcon = (TextView) findViewById(R.id.weather_icon);
@@ -55,26 +95,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        //set url
-        urlApi.setUri(url);
+
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            DataSerialNumber = bundle.getString("Data_SerialNumber");
+            //set url
+            urlApi.setUri(url,DataSerialNumber);
+        }
 
         // Connect loadJson choice 1 setTime
         this.conLoadJSON(1);
     }
 
+    // SyncState icon draweToggle
     @Override
     public void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        Log.d("APP", "onPostCreate");
         drawerToggle.syncState();
     }
 
+    // Create MenuBar on Toolbar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.activity_main_toolbar, menu);
         return true;
     }
 
+    // Click button refresh
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -84,14 +132,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
+
+    // Select Menu Naviation
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
         switch (id) {
+            case R.id.nav_main:
+               /* Intent intent = new Intent(this, MainActivity.class);
+                startActivity(intent);*/
+                finish();
+                startActivity(getIntent());
+                break;
             case R.id.nav_profile:
+               /* Intent intent = new Intent(this, ProfileActivity.class);
+                startActivity(intent);*/
+                if (DataSerialNumber != null) {
+                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    intent.putExtra("P_SerialNumber", DataSerialNumber);
+                    startActivity(intent);
+                    //finish();
+                }
                 break;
             case R.id.nav_setting:
                 break;
@@ -104,46 +168,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    // connect Load Json
-    private void conLoadJSON(int choice) {
-        // Check Network Connected
-        if (isNetworkConnected()) {
-            // choice 1 setTime
-            if (choice == 1) {
-                Timer timer = new Timer();
-                TimerTask tasknew = new TimerTask() {
-                    public void run() {
-                        new LoadJSON().execute(urlApi.getUrl());
-                    }
-                };
-                timer.scheduleAtFixedRate(tasknew, 5 * 100, 300 * 1000);
-            } else
-                new LoadJSON().execute(urlApi.getUrl());
-        } else {
-            showProblemDialog("Not Connected Network");
-        }
-    }
-
-    // ShoeAlertProblemDialog
-    private void showProblemDialog(String message) {
-        AlertDialog.Builder dialog = new AlertDialog.Builder(this);
-        dialog.setTitle("Problem");
-        dialog.setIcon(R.mipmap.ic_launcher);
-        dialog.setCancelable(true);
-        dialog.setMessage(message);
-        dialog.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                finish();
-            }
-        });
-        dialog.show();
-    }
-
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
-    }
-
+    //Show  Toolbar
     private void initToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle("LocalWeatherNow");
@@ -151,11 +176,52 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
     }
 
+    //Show DrawerLayout and drawerToggle
     private void initInstances() {
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(drawerToggle);
         //drawerToggle.syncState();
+    }
+
+    // Connect Load Json
+    private void conLoadJSON(int choice) {
+        // Check Network Connected
+        if (isNetworkConnected()) {
+            // choice 1 setTime
+            if (choice == 1) {
+                TimerTask taskNew = new TimerTask() {
+                    public void run() {
+                        // series
+                        new LoadJSON().execute(urlApi.getUrl());
+                        // Parallel
+                        // new LoadJSON().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,urlApi.getUrl());
+                    }
+                };
+                Timer timer = new Timer();
+                timer.scheduleAtFixedRate(taskNew, 2 * 100, 300 * 1000);
+            } else {
+                // series
+                new LoadJSON().execute(urlApi.getUrl());
+            }
+        } else {
+            dialog.showProblemDialog(this, "Problem", "Not Connected Network1");
+        }
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+    //Button back
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
+        else
+            finish();
     }
 
     private class LoadJSON extends AsyncTask<String, Void, String> {
@@ -167,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
         private TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
         private TextView weatherLight = (TextView) findViewById(R.id.weather_light);
+        //private TextView deviceSerialNumber = (TextView) findViewById(R.id.device_serialNumber);
 
         private String temp = "";
         private String humidity = "";
@@ -175,13 +242,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private String light = "";
         private String rain = "";
         private String updated_at = "";
+        // private String SerialNumber = "";
         private String icon;
         private double tempDouble;
         private int rainInt, timeInt;
 
-
         @Override
         protected String doInBackground(String... urls) {
+            Log.d("APP", "doInBackground");
             String strResult = "";
             if (isNetworkConnected()) {
                 try {
@@ -192,13 +260,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     e.printStackTrace();
                 }
             } else {
-                showProblemDialog("Not Connected Network");
+                dialog.showProblemDialog(MainActivity.this, "Problem", "Not Connected Network");
             }
             return strResult;
         }
 
         @Override
         protected void onPostExecute(String result) {
+            Log.d("APP", "onPostExecute");
             try {
                 JSONObject json = new JSONObject(result);
                 temp += String.format("%s", json.getString("temp"));
@@ -208,58 +277,57 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 light += String.format("%s", json.getString("light"));
                 rain += String.format("%s", json.getString("rain"));
                 updated_at += String.format("%s", json.getString("updated_at"));
+                //String Serial = String.format("%s", json.getString("SerialNumber"));
                 String time = updated_at.substring(11, 13);
-                try {
-                    tempDouble = Double.parseDouble(temp);
-                    rainInt = Integer.parseInt(rain);
-                    timeInt = Integer.parseInt(time);
-                    if (rainInt == 1) {
-                        if (timeInt >= 6 && timeInt < 18) {
-                            icon = getString(R.string.weather_day_rain);
-                            weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 120);
-                            weatherIcon.setText(icon);
-                            weatherStatusName.setText(R.string.Text_Daytime_Rain);
-                        } else {
-                            icon = getString(R.string.weather_night_rain);
-                            weatherIcon.setText(icon);
-                            weatherStatusName.setText(R.string.Text_Nighttime_Rain);
-                        }
-                    } else if (tempDouble >= 35.0) {
-                        icon = getString(R.string.weather_hot);
+
+                tempDouble = Double.parseDouble(temp);
+                rainInt = Integer.parseInt(rain);
+                timeInt = Integer.parseInt(time);
+                if (rainInt == 1) {
+                    if (timeInt >= 6 && timeInt < 18) {
+                        icon = getString(R.string.weather_day_rain);
+                        weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 120);
                         weatherIcon.setText(icon);
-                        weatherStatusName.setText(R.string.Text_hot);
-                    } else if (tempDouble > 22.9) {
-                        if (timeInt >= 6 && timeInt < 18) {
-                            icon = getString(R.string.weather_sunny);
-                            weatherIcon.setText(icon);
-                            weatherStatusName.setText(R.string.Text_Daytime_Neutral);
-                        } else {
-                            icon = getString(R.string.weather_night_clear);
-                            weatherIcon.setText(icon);
-                            weatherStatusName.setText(R.string.Text_Nighttime_Neutral);
-                        }
-                    } else if (tempDouble <= 22.9) {
-                        icon = getString(R.string.weather_cold);
+                        weatherStatusName.setText(R.string.Text_Daytime_Rain);
+                    } else {
+                        icon = getString(R.string.weather_night_rain);
+                        weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 140);
                         weatherIcon.setText(icon);
-                        weatherStatusName.setText(R.string.Text_cold);
+                        weatherStatusName.setText(R.string.Text_Nighttime_Rain);
                     }
-
-                    statusUpdate.setText(String.format("Last update %s", updated_at));
-                    weatherTemp.setText(String.format("%s ℃", tempDouble));
-                    weatherHumidity.setText(String.format("Humidity: %s %%", humidity));
-                    weatherPressure.setText(String.format("Pressure: %s", pressure));
-                    weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
-                    weatherLight.setText(String.format("Light: %s", light));
-
-                } catch (NumberFormatException e) {
-                    showProblemDialog("Connect Server fail");
-                    e.printStackTrace();
+                } else if (tempDouble >= 35.0) {
+                    icon = getString(R.string.weather_hot);
+                    weatherIcon.setText(icon);
+                    weatherStatusName.setText(R.string.Text_hot);
+                } else if (tempDouble > 22.9) {
+                    if (timeInt >= 6 && timeInt < 18) {
+                        icon = getString(R.string.weather_sunny);
+                        weatherIcon.setText(icon);
+                        weatherStatusName.setText(R.string.Text_Daytime_Neutral);
+                    } else {
+                        icon = getString(R.string.weather_night_clear);
+                        weatherIcon.setText(icon);
+                        weatherStatusName.setText(R.string.Text_Nighttime_Neutral);
+                    }
+                } else if (tempDouble <= 22.9) {
+                    icon = getString(R.string.weather_cold);
+                    weatherIcon.setText(icon);
+                    weatherStatusName.setText(R.string.Text_cold);
                 }
+
+                statusUpdate.setText(String.format("Last update %s", updated_at));
+                weatherTemp.setText(String.format("%s ℃", tempDouble));
+                weatherHumidity.setText(String.format("Humidity: %s %%", humidity));
+                weatherPressure.setText(String.format("Pressure: %s", pressure));
+                weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
+                weatherLight.setText(String.format("Light: %s", light));
+                //deviceSerialNumber.setText(String.format("%s", SerialNumber));
+
             } catch (JSONException e) {
-                showProblemDialog("Data Not fount \n");
+                dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found");
                 e.printStackTrace();
             } catch (Exception e) {
-                showProblemDialog("Program Stop");
+                dialog.showProblemDialog(MainActivity.this, "Problem", "Program Stop");
                 e.printStackTrace();
             }
 

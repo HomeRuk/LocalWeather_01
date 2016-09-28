@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">LocalWeather</string>
+    <string name="app_name">WeatherNow</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -9,6 +9,8 @@
     <string name="weather_day_rain">&#xf008;</string>
     <string name="weather_cold">&#xf076;</string>
     <string name="weather_hot">&#xf0c7;</string>
+
+    <string name="weather_rain">&#xf019;</string>
 
     <string name="weather_night_clear">&#xf02e;</string>
     <string name="weather_night_rain">&#xf028;</string>
@@ -23,4 +25,11 @@
     <string name="Text_Nighttime_Neutral">Night clear</string>
     <string name="Text_hot">Hot</string>
     <string name="Text_cold">Cold</string>
+    <string name="title_activity_create_device">Sign in</string>
+
+    <!-- textview -->
+    <string name="login_title">WeatherNow</string>
+    <string name="SerialNumber_title">SerialNumber</string>
+    <string name="password_title">Password</string>
+    <string name="button_connect">Connect</string>
 </resources>
