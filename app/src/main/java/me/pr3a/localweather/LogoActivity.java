@@ -78,7 +78,7 @@ public class LogoActivity extends AppCompatActivity {
                 //set url
                 urlApi.setUri(url, data);
                 new LoadJSON0().execute(urlApi.getUrl());
-            }else{
+            } else {
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -89,14 +89,23 @@ public class LogoActivity extends AppCompatActivity {
                 }, 1500);
             }
         } catch (Exception ioe) {
+            try {
+                FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                writer.write("");
+                writer.flush();
+                writer.close();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
             Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startActivity(new Intent(LogoActivity.this, ConnectDeviceActivity.class));
-                        finish();
-                    }
-                }, 1500);
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    startActivity(new Intent(LogoActivity.this, ConnectDeviceActivity.class));
+                    finish();
+                }
+            }, 1500);
             ioe.printStackTrace();
         }
 
