@@ -88,7 +88,7 @@ public class LogoActivity extends AppCompatActivity {
                     }
                 }, 1500);
             }
-        } catch (Exception ioe) {
+        } catch (Exception e) {
             try {
                 FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
                 OutputStreamWriter writer = new OutputStreamWriter(fOut);
@@ -106,7 +106,7 @@ public class LogoActivity extends AppCompatActivity {
                     finish();
                 }
             }, 1500);
-            ioe.printStackTrace();
+            e.printStackTrace();
         }
 
 
