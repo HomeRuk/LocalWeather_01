@@ -8,15 +8,19 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -28,6 +32,7 @@ public class ProfileActivity extends AppCompatActivity {
     private final static String url = "http://128.199.210.91/weather/";
     private UrlApi urlApi = new UrlApi();
     private MyAlertDialog dialog = new MyAlertDialog();
+    private static final String FILENAME = "data.txt";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,26 @@ public class ProfileActivity extends AppCompatActivity {
 
         //urlApi.setUri(url,"ZgkL2LfL0Q");
         //new LoadJSON2().execute(urlApi.getUrl());
+        final Button btClear = (Button) findViewById(R.id.bt_Clear);
+        btClear.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    FileOutputStream fOut = openFileOutput(FILENAME,
+                            MODE_PRIVATE);
+                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
+
+                    writer.write("");
+                    writer.flush();
+                    writer.close();
+
+                    Toast.makeText(ProfileActivity.this,
+                            "Clear successfully!", Toast.LENGTH_SHORT)
+                            .show();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+            }
+        });
 
         String PSerialNumber;
         Bundle bundle = getIntent().getExtras();

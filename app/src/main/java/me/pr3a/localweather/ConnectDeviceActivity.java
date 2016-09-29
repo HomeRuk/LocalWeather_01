@@ -10,14 +10,18 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -30,18 +34,67 @@ public class ConnectDeviceActivity extends AppCompatActivity {
     private UrlApi urlApi = new UrlApi();
     private MyAlertDialog dialog = new MyAlertDialog();
     private String ESerial;
+    private static final String FILENAME = "data.txt";
+    private static final int READ_BLOCK_SIZE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_device);
 
-        Button buttonConnect = (Button) findViewById(R.id.button_connect);
         final EditText etSerial = (EditText) findViewById(R.id.serial);
+        final Button buttonConnect = (Button) findViewById(R.id.button_connect);
+
+        try {
+            FileInputStream fIn = openFileInput(FILENAME);
+            InputStreamReader reader = new InputStreamReader(fIn);
+
+            char[] buffer = new char[READ_BLOCK_SIZE];
+            String data = "";
+            int charReadCount;
+            while ((charReadCount = reader.read(buffer)) > 0) {
+                String readString = String.copyValueOf(buffer, 0,
+                        charReadCount);
+                data += readString;
+                buffer = new char[READ_BLOCK_SIZE];
+            }
+            reader.close();
+
+            //etSerial.setText(data);
+            /*Toast.makeText(ConnectDeviceActivity.this,
+                    "loaded successfully!", Toast.LENGTH_SHORT)
+                    .show();*/
+            if(!(data.equals("")))
+            {
+                //set url
+                urlApi.setUri(url, data);
+                new LoadJSON1().execute(urlApi.getUrl());
+            }
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
 
         buttonConnect.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 ESerial = etSerial.getText().toString();
+
+                try {
+                    FileOutputStream fOut = openFileOutput(FILENAME,
+                            MODE_PRIVATE);
+                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
+
+                    writer.write(ESerial);
+                    writer.flush();
+                    writer.close();
+
+                    etSerial.setText("");
+                    Toast.makeText(ConnectDeviceActivity.this,
+                            "saved successfully!", Toast.LENGTH_SHORT)
+                            .show();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+
                 //set url
                 urlApi.setUri(url, ESerial);
                 // LoadJSON
