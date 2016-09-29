@@ -10,15 +10,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -43,8 +46,18 @@ public class LogoActivity extends AppCompatActivity {
         TextView weatherIcon = (TextView) findViewById(R.id.logo);
         weatherIcon.setTypeface(weatherFont);
         weatherIcon.setText(getString(R.string.weather_rain));
-
-
+        try {
+            FileOutputStream fOut = openFileOutput(FILENAME,
+                    MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+            if (fOut == null) {
+                writer.write("");
+                writer.flush();
+                writer.close();
+            }
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
         try {
             FileInputStream fIn = openFileInput(FILENAME);
             InputStreamReader reader = new InputStreamReader(fIn);
@@ -60,12 +73,11 @@ public class LogoActivity extends AppCompatActivity {
             }
             reader.close();
 
-            if(!(data.equals("")))
-            {
+            if (!(data.equals(""))) {
                 //set url
                 urlApi.setUri(url, data);
                 new LoadJSON0().execute(urlApi.getUrl());
-            }else{
+            } else {
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
