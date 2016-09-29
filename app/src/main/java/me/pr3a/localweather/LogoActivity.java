@@ -46,18 +46,19 @@ public class LogoActivity extends AppCompatActivity {
         TextView weatherIcon = (TextView) findViewById(R.id.logo);
         weatherIcon.setTypeface(weatherFont);
         weatherIcon.setText(getString(R.string.weather_rain));
-        try {
-            FileOutputStream fOut = openFileOutput(FILENAME,
-                    MODE_PRIVATE);
-            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+        /*try {
+            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+            Toast.makeText(LogoActivity.this, "null0", Toast.LENGTH_SHORT).show();
             if (fOut == null) {
+                Toast.makeText(LogoActivity.this, "null", Toast.LENGTH_SHORT).show();
+                OutputStreamWriter writer = new OutputStreamWriter(fOut);
                 writer.write("");
                 writer.flush();
                 writer.close();
             }
         } catch (IOException ioe) {
             ioe.printStackTrace();
-        }
+        }*/
         try {
             FileInputStream fIn = openFileInput(FILENAME);
             InputStreamReader reader = new InputStreamReader(fIn);
@@ -77,7 +78,7 @@ public class LogoActivity extends AppCompatActivity {
                 //set url
                 urlApi.setUri(url, data);
                 new LoadJSON0().execute(urlApi.getUrl());
-            } else {
+            }else{
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
@@ -87,7 +88,15 @@ public class LogoActivity extends AppCompatActivity {
                     }
                 }, 1500);
             }
-        } catch (IOException ioe) {
+        } catch (Exception ioe) {
+            Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        startActivity(new Intent(LogoActivity.this, ConnectDeviceActivity.class));
+                        finish();
+                    }
+                }, 1500);
             ioe.printStackTrace();
         }
 
