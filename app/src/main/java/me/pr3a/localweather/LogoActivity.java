@@ -4,13 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.URL;
 
 import me.pr3a.localweather.Helper.MyAlertDialog;
@@ -30,11 +31,11 @@ import me.pr3a.localweather.Helper.UrlApi;
 
 public class LogoActivity extends AppCompatActivity {
 
-    private final static String url = "http://128.199.210.91/device/";
     private UrlApi urlApi = new UrlApi();
-    private static final String FILENAME = "data.txt";
-    private static final int READ_BLOCK_SIZE = 100;
     private MyAlertDialog dialog = new MyAlertDialog();
+    private final static String FILENAME = "data.txt";
+    private final static String url = "http://128.199.210.91/device/";
+    private final static int READ_BLOCK_SIZE = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,75 +47,61 @@ public class LogoActivity extends AppCompatActivity {
         TextView weatherIcon = (TextView) findViewById(R.id.logo);
         weatherIcon.setTypeface(weatherFont);
         weatherIcon.setText(getString(R.string.weather_rain));
-        /*try {
-            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
-            Toast.makeText(LogoActivity.this, "null0", Toast.LENGTH_SHORT).show();
-            if (fOut == null) {
-                Toast.makeText(LogoActivity.this, "null", Toast.LENGTH_SHORT).show();
-                OutputStreamWriter writer = new OutputStreamWriter(fOut);
-                writer.write("");
-                writer.flush();
-                writer.close();
-            }
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }*/
-        try {
-            FileInputStream fIn = openFileInput(FILENAME);
-            InputStreamReader reader = new InputStreamReader(fIn);
 
-            char[] buffer = new char[READ_BLOCK_SIZE];
-            String data = "";
-            int charReadCount;
-            while ((charReadCount = reader.read(buffer)) > 0) {
-                String readString = String.copyValueOf(buffer, 0,
-                        charReadCount);
-                data += readString;
-                buffer = new char[READ_BLOCK_SIZE];
-            }
-            reader.close();
-
-            if (!(data.equals(""))) {
-                //set url
-                urlApi.setUri(url, data);
-                new LoadJSON0().execute(urlApi.getUrl());
-            } else {
-                Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        startActivity(new Intent(LogoActivity.this, ConnectDeviceActivity.class));
-                        finish();
-                    }
-                }, 1500);
-            }
-        } catch (Exception e) {
+        if (isNetworkConnected()) {
             try {
-                FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
-                OutputStreamWriter writer = new OutputStreamWriter(fOut);
-                writer.write("");
-                writer.flush();
-                writer.close();
-            } catch (IOException ioe) {
-                ioe.printStackTrace();
-            }
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    startActivity(new Intent(LogoActivity.this, ConnectDeviceActivity.class));
-                    finish();
+                FileInputStream fIn = openFileInput(FILENAME);
+                InputStreamReader reader = new InputStreamReader(fIn);
+
+                char[] buffer = new char[READ_BLOCK_SIZE];
+                String data = "";
+                int charReadCount;
+                while ((charReadCount = reader.read(buffer)) > 0) {
+                    String readString = String.copyValueOf(buffer, 0, charReadCount);
+                    data += readString;
+                    buffer = new char[READ_BLOCK_SIZE];
                 }
-            }, 1500);
-            e.printStackTrace();
+                reader.close();
+                if (!(data.equals(""))) {
+                    //Set url & LoadJSON
+                    urlApi.setUri(url, data);
+                    new LoadJSON0().execute(urlApi.getUrl());
+                } else {
+                    intentDelay();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                    writer.write("");
+                    writer.flush();
+                    writer.close();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+                intentDelay();
+            }
+        }else{
+            dialog.showProblemDialog(LogoActivity.this, "Problem", "Not Connected Network");
         }
+    }
 
-
+    private void intentDelay() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                startActivity(new Intent(LogoActivity.this, ConnectDeviceActivity.class));
+                finish();
+            }
+        }, 1500);
     }
 
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     private class LoadJSON0 extends AsyncTask<String, Void, String> {
@@ -152,11 +139,23 @@ public class LogoActivity extends AppCompatActivity {
                     dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect Unsuccess1");
                 }
             } catch (JSONException e) {
+                e.printStackTrace();
+                try {
+                    //Writer Data Serial
+                    FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                    writer.write("");
+                    writer.flush();
+                    writer.close();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
                 dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect Unsuccess2");
-                e.printStackTrace();
+                /*startActivity(new Intent(LogoActivity.this, ConnectDeviceActivity.class));
+                finish();*/
             } catch (Exception e) {
-                dialog.showProblemDialog(LogoActivity.this, "Problem", "Program Stop");
                 e.printStackTrace();
+                dialog.showProblemDialog(LogoActivity.this, "Problem", "Program Stop");
             }
         }
 
@@ -168,7 +167,6 @@ public class LogoActivity extends AppCompatActivity {
                 reader = new BufferedReader(new InputStreamReader(in));
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    //sb.append(line + "\n");
                     sb.append(line);
                 }
             } catch (IOException e) {

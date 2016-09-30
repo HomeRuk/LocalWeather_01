@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+
 import me.pr3a.localweather.R;
 
 public class MyAlertDialog {
@@ -20,8 +21,7 @@ public class MyAlertDialog {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.dismiss();
             }
-        });
-        dialog.show();
+        }).show();
     }
 
     // ShowAlertProblemDialog
@@ -33,9 +33,10 @@ public class MyAlertDialog {
         dialog.setMessage(message);
         dialog.setPositiveButton("Exit", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
-                activity.finish();
+                //activity.finish();
+                android.os.Process.killProcess(android.os.Process.myPid());
+                System.exit(0);
             }
-        });
-        dialog.show();
+        }).show();
     }
 }

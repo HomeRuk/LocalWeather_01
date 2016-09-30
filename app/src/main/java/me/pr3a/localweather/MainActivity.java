@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private UrlApi urlApi = new UrlApi();
     private MyAlertDialog dialog = new MyAlertDialog();
     private String DataSerialNumber;
+
     // Event onStop
     @Override
     protected void onDestroy() {
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (bundle != null) {
             DataSerialNumber = bundle.getString("Data_SerialNumber");
             //set url
-            urlApi.setUri(url,DataSerialNumber);
+            urlApi.setUri(url, DataSerialNumber);
         }
 
         // Connect loadJson choice 1 setTime
@@ -151,6 +152,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                /* Intent intent = new Intent(this, ProfileActivity.class);
                 startActivity(intent);*/
                 if (DataSerialNumber != null) {
+                    finish();
                     Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                     intent.putExtra("P_SerialNumber", DataSerialNumber);
                     startActivity(intent);

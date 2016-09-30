@@ -2,16 +2,15 @@ package me.pr3a.localweather.Helper;
 
 public class UrlApi {
 
-    private String uri,url,apikey;
+    private String uri, url, apiKey;
 
-
-    public  void setUri(String url, String apikey){
+    public void setUri(String url, String apiKey) {
         this.url = url;
-        this.apikey = apikey;
-        this.uri = url + apikey;
+        this.apiKey = apiKey;
+        this.uri = url + apiKey;
     }
 
-    public  String getUrl(){
+    public String getUrl() {
         return uri;
     }
 }

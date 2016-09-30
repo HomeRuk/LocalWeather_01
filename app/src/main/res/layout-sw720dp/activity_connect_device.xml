@@ -34,7 +34,7 @@
             android:padding="32dp"
             android:singleLine="true"
             android:inputType="text"
-            android:textSize="32sp"/>
+            android:textSize="32sp" />
 
         <Button
             android:id="@+id/button_connect"

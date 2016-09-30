@@ -1,6 +1,7 @@
 package me.pr3a.localweather;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -41,38 +42,36 @@ public class ProfileActivity extends AppCompatActivity {
         //Display Toolbar
         this.showToolbar("Profile", "");
 
-        //urlApi.setUri(url,"ZgkL2LfL0Q");
-        //new LoadJSON2().execute(urlApi.getUrl());
-        final Button btClear = (Button) findViewById(R.id.bt_Clear);
-        btClear.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                try {
-                    FileOutputStream fOut = openFileOutput(FILENAME,
-                            MODE_PRIVATE);
-                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
-
-                    writer.write("");
-                    writer.flush();
-                    writer.close();
-
-                    Toast.makeText(ProfileActivity.this,
-                            "Clear successfully!", Toast.LENGTH_SHORT)
-                            .show();
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
+        if (isNetworkConnected()) {
+            final Button btClear = (Button) findViewById(R.id.bt_Clear);
+            btClear.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    try {
+                        FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                        OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                        writer.write("");
+                        writer.flush();
+                        writer.close();
+                        Toast.makeText(ProfileActivity.this, "Clear successfully!", Toast.LENGTH_SHORT).show();
+                        finish();
+                        startActivity(new Intent(ProfileActivity.this, LogoActivity.class));
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
                 }
+            });
+
+            String PSerialNumber;
+            Bundle bundle = getIntent().getExtras();
+            if (bundle != null) {
+                PSerialNumber = bundle.getString("P_SerialNumber");
+                //Set url & LoadJSON
+                urlApi.setUri(url, PSerialNumber);
+                new LoadJSON2().execute(urlApi.getUrl());
             }
-        });
-
-        String PSerialNumber;
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            PSerialNumber = bundle.getString("P_SerialNumber");
-            //set url
-            urlApi.setUri(url,PSerialNumber);
-            new LoadJSON2().execute(urlApi.getUrl());
+        } else {
+            dialog.showProblemDialog(ProfileActivity.this, "Problem", "Not Connected Network");
         }
-
     }
 
     private boolean isNetworkConnected() {
@@ -125,7 +124,6 @@ public class ProfileActivity extends AppCompatActivity {
                 deviceSerialNumber.setText(String.format("%s", Serial));
 
             } catch (JSONException e) {
-                //dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Connect Server fail");
                 dialog.showConnectDialog(ProfileActivity.this, "Problem", "Data Not Found");
                 e.printStackTrace();
             } catch (Exception e) {
