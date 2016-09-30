@@ -52,7 +52,7 @@ public class ProfileActivity extends AppCompatActivity {
                         writer.write("");
                         writer.flush();
                         writer.close();
-                        Toast.makeText(ProfileActivity.this, "Clear successfully!", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ProfileActivity.this, "Clear Data Successfully!", Toast.LENGTH_SHORT).show();
                         finish();
                         startActivity(new Intent(ProfileActivity.this, LogoActivity.class));
                     } catch (IOException ioe) {

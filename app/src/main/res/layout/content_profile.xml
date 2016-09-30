@@ -36,7 +36,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:background="@color/colorTextBase"
-        android:text="Clear"
+        android:text="Clear Data"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="18sp" />
 
