@@ -152,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                /* Intent intent = new Intent(this, ProfileActivity.class);
                 startActivity(intent);*/
                 if (DataSerialNumber != null) {
-                    finish();
                     Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
                     intent.putExtra("P_SerialNumber", DataSerialNumber);
                     startActivity(intent);
