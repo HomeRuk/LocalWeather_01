@@ -52,9 +52,16 @@ public class ProfileActivity extends AppCompatActivity {
                         writer.write("");
                         writer.flush();
                         writer.close();
+
                         Toast.makeText(ProfileActivity.this, "Clear Data Successfully!", Toast.LENGTH_SHORT).show();
+                        /*finish();
+                        startActivity(new Intent(ProfileActivity.this, LogoActivity.class));*/
+                        Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                                | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
                         finish();
-                        startActivity(new Intent(ProfileActivity.this, LogoActivity.class));
                     } catch (IOException ioe) {
                         ioe.printStackTrace();
                     }
