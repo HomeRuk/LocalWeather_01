@@ -67,6 +67,7 @@ public class LogoActivity extends AppCompatActivity {
                     urlApi.setUri(url, data);
                     new LoadJSON0().execute(urlApi.getUrl());
                 } else {
+                    Log.d("APP", "000000000000000000000000000000000000000");
                     intentDelay();
                 }
             } catch (Exception e) {
@@ -82,7 +83,7 @@ public class LogoActivity extends AppCompatActivity {
                 }
                 intentDelay();
             }
-        }else{
+        } else {
             dialog.showProblemDialog(LogoActivity.this, "Problem", "Not Connected Network");
         }
     }

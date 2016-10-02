@@ -12,17 +12,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.io.BufferedReader;
-import java.io.FileInputStream;
+//import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
-import java.net.InetAddress;
 import java.net.URL;
 
 import me.pr3a.localweather.Helper.UrlApi;
@@ -32,16 +33,22 @@ public class ConnectDeviceActivity extends AppCompatActivity {
 
     private UrlApi urlApi = new UrlApi();
     private MyAlertDialog dialog = new MyAlertDialog();
-    private String ESerial;
+    private String serial;
     private final static String FILENAME = "data.txt";
     private final static String url = "http://128.199.210.91/device/";
-    private final static int READ_BLOCK_SIZE = 100;
+    //private final static int READ_BLOCK_SIZE = 100;
+    private Button buttonConnect;
+    EditText editSerial;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect_device);
 
+        bindWidgets();
+        onButtonConnect();
+
+        /*
         try {
             FileInputStream fIn = openFileInput(FILENAME);
             InputStreamReader reader = new InputStreamReader(fIn);
@@ -66,34 +73,43 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
+        */
 
-        // Bind ButtonConnect & setOnClick
-        Button buttonConnect = (Button) findViewById(R.id.button_connect);
-        buttonConnect.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                EditText etSerial = (EditText) findViewById(R.id.serial);
-                ESerial = etSerial.getText().toString();
-                try {
-                    //Writer Data Serial
-                    FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
-                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
-                    writer.write(ESerial);
-                    writer.flush();
-                    writer.close();
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                }
-                //Set url & LoadJSON
-                urlApi.setUri(url, ESerial);
-                new LoadJSON1().execute(urlApi.getUrl());
-            }
-        });
     }
 
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting() ;
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    private void bindWidgets() {
+        buttonConnect = (Button) findViewById(R.id.button_connect);
+        editSerial = (EditText) findViewById(R.id.serial);
+    }
+
+    private void onButtonConnect() {
+        // setOnClick
+        buttonConnect.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                serial = editSerial.getText().toString();
+                //Check serial is not empty
+                try {
+                    if (!serial.isEmpty()) {
+                        //Check Connect network
+                        if (isNetworkConnected()) {
+                            //Set url & LoadJSON
+                            urlApi.setUri(url, serial);
+                            new LoadJSON1().execute(urlApi.getUrl());
+                        } else
+                            dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
+                    } else
+                        Toast.makeText(ConnectDeviceActivity.this, "Please fill in Serial Number", Toast.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
+                }
+            }
+        });
     }
 
     private class LoadJSON1 extends AsyncTask<String, Void, String> {
@@ -108,8 +124,10 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                     HttpURLConnection con = (HttpURLConnection) url.openConnection();
                     strResult = readStream(con.getInputStream());
                 } catch (Exception e) {
-                    dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
+                    Log.d("APP", "111111");
                     e.printStackTrace();
+                    //finish();
+                    dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
                 }
             } else {
                 dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
@@ -124,13 +142,24 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                 JSONObject json = new JSONObject(result);
                 String Serial = String.format("%s", json.getString("SerialNumber"));
                 if (Serial != null) {
+                    try {
+                        //Writer Data Serial
+                        FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                        OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                        writer.write(serial);
+                        writer.flush();
+                        writer.close();
+                    } catch (IOException ioe) {
+                        dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect Unsuccess1");
+                        ioe.printStackTrace();
+                    }
                     Toast.makeText(ConnectDeviceActivity.this, "Save successfully!", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(ConnectDeviceActivity.this, MainActivity.class);
                     intent.putExtra("Data_SerialNumber", Serial);
                     startActivity(intent);
                     finish();
                 }
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 try {
                     //Writer Data Serial
                     FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
@@ -138,17 +167,11 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                     writer.write("");
                     writer.flush();
                     writer.close();
-                    /*
-                        finish();
-                        startActivity(getIntent());
-                    */
                 } catch (IOException ioe) {
+                    dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect Unsuccess1");
                     ioe.printStackTrace();
                 }
                 dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect Unsuccess2");
-                e.printStackTrace();
-            } catch (Exception e) {
-                dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Program Stop");
                 e.printStackTrace();
             }
         }

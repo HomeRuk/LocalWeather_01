@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final static String url = "http://128.199.210.91/weather/";
     private UrlApi urlApi = new UrlApi();
     private MyAlertDialog dialog = new MyAlertDialog();
-    private String DataSerialNumber;
+    private String DataSerialNumber = "";
 
     // Event onStop
     @Override
@@ -95,7 +95,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // NavigationView
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
@@ -234,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
         private TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
         private TextView weatherLight = (TextView) findViewById(R.id.weather_light);
-        //private TextView deviceSerialNumber = (TextView) findViewById(R.id.device_serialNumber);
+        private TextView deviceSerialNumber = (TextView) findViewById(R.id.device_serialNumber);
 
         private String temp = "";
         private String humidity = "";
@@ -278,7 +277,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 light += String.format("%s", json.getString("light"));
                 rain += String.format("%s", json.getString("rain"));
                 updated_at += String.format("%s", json.getString("updated_at"));
-                //String Serial = String.format("%s", json.getString("SerialNumber"));
                 String time = updated_at.substring(11, 13);
 
                 tempDouble = Double.parseDouble(temp);
@@ -322,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 weatherPressure.setText(String.format("Pressure: %s", pressure));
                 weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
                 weatherLight.setText(String.format("Light: %s", light));
-                //deviceSerialNumber.setText(String.format("%s", SerialNumber));
+                deviceSerialNumber.setText(String.format("%s", DataSerialNumber));
 
             } catch (JSONException e) {
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found");
