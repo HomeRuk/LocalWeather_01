@@ -17,17 +17,10 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentStart="true">
 
-        <ListView
-            android:id="@+id/mobile_list"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="SerialNumber" />
-
         <TextView
             android:id="@+id/txt_Serial"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="31dp"
             android:text="SerialNumber"
             android:textSize="24sp" />
 
