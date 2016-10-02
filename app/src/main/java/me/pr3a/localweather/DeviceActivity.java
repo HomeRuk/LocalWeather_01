@@ -9,10 +9,13 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+
 import org.json.JSONObject;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+
 import me.pr3a.localweather.Helper.UrlApi;
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import okhttp3.OkHttpClient;

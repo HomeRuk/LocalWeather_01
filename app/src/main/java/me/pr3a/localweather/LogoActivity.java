@@ -15,19 +15,17 @@ import android.widget.TextView;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.InetAddress;
-import java.net.URL;
 
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import me.pr3a.localweather.Helper.UrlApi;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class LogoActivity extends AppCompatActivity {
 
@@ -67,7 +65,6 @@ public class LogoActivity extends AppCompatActivity {
                     urlApi.setUri(url, data);
                     new LoadJSON0().execute(urlApi.getUrl());
                 } else {
-                    Log.d("APP", "000000000000000000000000000000000000000");
                     intentDelay();
                 }
             } catch (Exception e) {
@@ -110,19 +107,20 @@ public class LogoActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... urls) {
             Log.d("APP", "doInBackground");
-            String strResult = "";
-            if (isNetworkConnected()) {
-                try {
-                    URL url = new URL(urls[0]);
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    strResult = readStream(con.getInputStream());
-                } catch (Exception e) {
-                    e.printStackTrace();
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request.Builder builder = new Request.Builder();
+            Request request = builder.url(urls[0]).build();
+            try {
+                Response response = okHttpClient.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    return response.body().string();
+                } else {
+                    return "Not Success - code : " + response.code();
                 }
-            } else {
-                dialog.showProblemDialog(LogoActivity.this, "Problem", "Not Connected Network");
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Error - " + e.getMessage();
             }
-            return strResult;
         }
 
         @Override
@@ -139,7 +137,7 @@ public class LogoActivity extends AppCompatActivity {
                 } else {
                     dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect Unsuccess1");
                 }
-            } catch (JSONException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 try {
                     //Writer Data Serial
@@ -151,37 +149,8 @@ public class LogoActivity extends AppCompatActivity {
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                 }
-                dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect Unsuccess2");
-                /*startActivity(new Intent(LogoActivity.this, ConnectDeviceActivity.class));
-                finish();*/
-            } catch (Exception e) {
-                e.printStackTrace();
                 dialog.showProblemDialog(LogoActivity.this, "Problem", "Program Stop");
             }
-        }
-
-        // Read text json first to last
-        private String readStream(InputStream in) {
-            BufferedReader reader = null;
-            StringBuilder sb = new StringBuilder();
-            try {
-                reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return sb.toString();
         }
     }
 }
