@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".ProfileActivity">
+    tools:context=".DeviceActivity">
     <!-- layout_height 56dp
         ?attr/actionBarSize" is @dimen/abc_action_bar_default_height_material = 56dp
         -->
@@ -17,7 +17,7 @@
         app:navigationIcon="@drawable/ic_arrow_back_black_24dp" />
 
     <include
-        layout="@layout/content_profile"
+        layout="@layout/content_device"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </android.support.design.widget.AppBarLayout>

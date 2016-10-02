@@ -17,15 +17,19 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Timer;
@@ -39,7 +43,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar toolbar;
     private ActionBarDrawerToggle drawerToggle;
     private TextView weatherIcon;
-    private final static String url = "http://128.199.210.91/weather/";
+    private static final String url = "http://128.199.210.91/weather/";
+    private static final String FILENAME = "data.txt";
     private UrlApi urlApi = new UrlApi();
     private MyAlertDialog dialog = new MyAlertDialog();
     private String DataSerialNumber = "";
@@ -92,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         this.initToolbar();
         this.initInstances();
+
         // NavigationView
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -105,6 +111,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Connect loadJson choice 1 setTime
         this.conLoadJSON(1);
+    }
+
+    public void onClickDisconnect(View view) {
+        try {
+            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+            writer.write("");
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(MainActivity.this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+        }
     }
 
     // SyncState icon draweToggle
@@ -132,8 +158,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
-
-    // Select Menu Naviation
+    // Select Menu Navigation
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -147,15 +172,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 finish();
                 startActivity(getIntent());
                 break;
-            case R.id.nav_profile:
-               /* Intent intent = new Intent(this, ProfileActivity.class);
-                startActivity(intent);*/
+            case R.id.nav_DeviceProfile:
                 if (DataSerialNumber != null) {
-                    Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                    Intent intent = new Intent(MainActivity.this, DeviceActivity.class);
                     intent.putExtra("P_SerialNumber", DataSerialNumber);
                     startActivity(intent);
                     //finish();
                 }
+                break;
+            case R.id.nav_location:
                 break;
             case R.id.nav_setting:
                 break;

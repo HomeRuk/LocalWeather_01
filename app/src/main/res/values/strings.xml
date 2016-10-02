@@ -32,4 +32,5 @@
     <string name="SerialNumber_title">SerialNumber</string>
     <string name="password_title">Password</string>
     <string name="button_connect">Connect</string>
+    <string name="dis_connect">Disconnect</string>
 </resources>

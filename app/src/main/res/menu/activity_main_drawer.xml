@@ -7,9 +7,9 @@
             android:icon="@drawable/ic_home_black_24dp"
             android:title="Main" />
         <item
-            android:id="@+id/nav_profile"
-            android:icon="@drawable/ic_account_box_black_24dp"
-            android:title="Profile" />
+            android:id="@+id/nav_DeviceProfile"
+            android:icon="@drawable/ic_dvr_black_24dp"
+            android:title="Device" />
         <item
             android:id="@+id/nav_location"
             android:icon="@drawable/ic_my_location_black_24dp"
