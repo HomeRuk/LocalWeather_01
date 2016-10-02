@@ -365,7 +365,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 reader = new BufferedReader(new InputStreamReader(in));
                 String line;
                 while ((line = reader.readLine()) != null) {
-                    //sb.append(line + "\n");
                     sb.append(line);
                 }
             } catch (IOException e) {

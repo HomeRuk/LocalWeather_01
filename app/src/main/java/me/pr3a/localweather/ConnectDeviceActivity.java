@@ -12,22 +12,16 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.BufferedReader;
 //import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
-
 import me.pr3a.localweather.Helper.UrlApi;
 import me.pr3a.localweather.Helper.MyAlertDialog;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class ConnectDeviceActivity extends AppCompatActivity {
 
@@ -47,34 +41,6 @@ public class ConnectDeviceActivity extends AppCompatActivity {
 
         bindWidgets();
         onButtonConnect();
-
-        /*
-        try {
-            FileInputStream fIn = openFileInput(FILENAME);
-            InputStreamReader reader = new InputStreamReader(fIn);
-            char[] buffer = new char[READ_BLOCK_SIZE];
-            String data = "";
-            int charReadCount;
-
-            while ((charReadCount = reader.read(buffer)) > 0) {
-                String readString = String.copyValueOf(buffer, 0,
-                        charReadCount);
-                data += readString;
-                buffer = new char[READ_BLOCK_SIZE];
-            }
-            reader.close();
-
-            if (!(data.equals(""))) {
-                //Set url & LoadJSON
-                urlApi.setUri(url, data);
-                new LoadJSON1().execute(urlApi.getUrl());
-            }
-
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
-        }
-        */
-
     }
 
     private boolean isNetworkConnected() {
@@ -117,22 +83,20 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... urls) {
             Log.d("APP", "doInBackground");
-            String strResult = "";
-            if (isNetworkConnected()) {
-                try {
-                    URL url = new URL(urls[0]);
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    strResult = readStream(con.getInputStream());
-                } catch (Exception e) {
-                    Log.d("APP", "111111");
-                    e.printStackTrace();
-                    //finish();
-                    dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request.Builder builder = new Request.Builder();
+            Request request = builder.url(urls[0]).build();
+            try {
+                Response response = okHttpClient.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    return response.body().string();
+                } else {
+                    return "Not Success - code : " + response.code();
                 }
-            } else {
-                dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Error - " + e.getMessage();
             }
-            return strResult;
         }
 
         @Override
@@ -174,30 +138,6 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                 dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect Unsuccess2");
                 e.printStackTrace();
             }
-        }
-
-        // Read text json first to last
-        private String readStream(InputStream in) {
-            BufferedReader reader = null;
-            StringBuilder sb = new StringBuilder();
-            try {
-                reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return sb.toString();
         }
     }
 }
