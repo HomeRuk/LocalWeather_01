@@ -21,7 +21,7 @@
             android:id="@+id/txt_Serial"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SerialNumber"
+            android:text="@string/tx_serialnumber"
             android:textSize="24sp" />
 
         <TextView

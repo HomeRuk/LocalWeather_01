@@ -74,16 +74,6 @@
         android:textSize="40sp"
         android:textColor="@color/colorTextBase" />
 
-    <!--
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/activity_horizontal_margin"
-        android:id="@+id/textview_SerialNumber"
-        android:layout_below="@+id/textview_statusUpdate"
-        android:layout_centerHorizontal="true" />
-        -->
-
     <TextView
         android:id="@+id/textview_statusUpdate"
         android:layout_width="wrap_content"

@@ -45,8 +45,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView weatherIcon;
     private static final String url = "http://128.199.210.91/weather/";
     private static final String FILENAME = "data.txt";
-    private UrlApi urlApi = new UrlApi();
-    private MyAlertDialog dialog = new MyAlertDialog();
+    private final UrlApi urlApi = new UrlApi();
+    private final MyAlertDialog dialog = new MyAlertDialog();
     private String DataSerialNumber = "";
 
     // Event onStop
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // SyncState icon draweToggle
+    // SyncState icon drawerToggle
     @Override
     public void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -224,7 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 };
                 Timer timer = new Timer();
-                timer.scheduleAtFixedRate(taskNew, 2 * 100, 300 * 1000);
+                timer.scheduleAtFixedRate(taskNew, 5 * 100, 300 * 1000);
             } else {
                 // series
                 new LoadJSON().execute(urlApi.getUrl());
@@ -251,14 +251,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private class LoadJSON extends AsyncTask<String, Void, String> {
 
-        private TextView statusUpdate = (TextView) findViewById(R.id.textview_statusUpdate);
-        private TextView weatherStatusName = (TextView) findViewById(R.id.weather_statusName);
-        private TextView weatherTemp = (TextView) findViewById(R.id.weather_temperature);
-        private TextView weatherHumidity = (TextView) findViewById(R.id.weather_humidity);
-        private TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
-        private TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
-        private TextView weatherLight = (TextView) findViewById(R.id.weather_light);
-        private TextView deviceSerialNumber = (TextView) findViewById(R.id.device_serialNumber);
+        private final TextView statusUpdate = (TextView) findViewById(R.id.textview_statusUpdate);
+        private final TextView weatherStatusName = (TextView) findViewById(R.id.weather_statusName);
+        private final TextView weatherTemp = (TextView) findViewById(R.id.weather_temperature);
+        private final TextView weatherHumidity = (TextView) findViewById(R.id.weather_humidity);
+        private final TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
+        private final TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
+        private final TextView weatherLight = (TextView) findViewById(R.id.weather_light);
+        private final TextView deviceSerialNumber = (TextView) findViewById(R.id.device_serialNumber);
 
         private String temp = "";
         private String humidity = "";
@@ -345,12 +345,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 weatherPressure.setText(String.format("Pressure: %s", pressure));
                 weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
                 weatherLight.setText(String.format("Light: %s", light));
-                deviceSerialNumber.setText(String.format("%s", DataSerialNumber));
+                deviceSerialNumber.setText(DataSerialNumber);
 
             } catch (JSONException e) {
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found");
                 e.printStackTrace();
-            } catch (Exception e) {
+            }
+            catch (Exception e) {
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Program Stop");
                 e.printStackTrace();
             }

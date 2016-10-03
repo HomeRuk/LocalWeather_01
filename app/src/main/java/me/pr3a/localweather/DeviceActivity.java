@@ -12,10 +12,6 @@ import android.widget.TextView;
 
 import org.json.JSONObject;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.TimeZone;
-
 import me.pr3a.localweather.Helper.UrlApi;
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import okhttp3.OkHttpClient;
@@ -25,8 +21,8 @@ import okhttp3.Response;
 public class DeviceActivity extends AppCompatActivity {
 
     private final static String url = "http://128.199.210.91/weather/";
-    private UrlApi urlApi = new UrlApi();
-    private MyAlertDialog dialog = new MyAlertDialog();
+    private final UrlApi urlApi = new UrlApi();
+    private final MyAlertDialog dialog = new MyAlertDialog();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +70,7 @@ public class DeviceActivity extends AppCompatActivity {
 
     private class LoadJSON2 extends AsyncTask<String, Void, String> {
 
-        private TextView deviceSerialNumber = (TextView) findViewById(R.id.txt_SerialNumber);
+        private final TextView deviceSerialNumber = (TextView) findViewById(R.id.txt_SerialNumber);
 
         @Override
         protected String doInBackground(String... urls) {

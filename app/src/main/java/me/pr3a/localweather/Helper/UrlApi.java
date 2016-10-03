@@ -2,7 +2,9 @@ package me.pr3a.localweather.Helper;
 
 public class UrlApi {
 
-    private String uri, url, apiKey;
+    private String uri;
+    private String url;
+    private String apiKey;
 
     public void setUri(String url, String apiKey) {
         this.url = url;
@@ -11,6 +13,6 @@ public class UrlApi {
     }
 
     public String getUrl() {
-        return uri;
+        return this.uri;
     }
 }

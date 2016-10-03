@@ -5,18 +5,18 @@
         <item
             android:id="@+id/nav_main"
             android:icon="@drawable/ic_home_black_24dp"
-            android:title="Main" />
+            android:title="@string/deawer_Main" />
         <item
             android:id="@+id/nav_DeviceProfile"
             android:icon="@drawable/ic_dvr_black_24dp"
-            android:title="Device" />
+            android:title="@string/deawer_Device" />
         <item
             android:id="@+id/nav_location"
             android:icon="@drawable/ic_my_location_black_24dp"
-            android:title="location" />
+            android:title="@string/deawer_location" />
         <item
             android:id="@+id/nav_setting"
             android:icon="@drawable/ic_settings_black_24dp"
-            android:title="Setting" />
+            android:title="@string/deawer_Setting" />
     </group>
 </menu>

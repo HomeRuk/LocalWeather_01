@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.FileInputStream;
@@ -29,8 +28,8 @@ import okhttp3.Response;
 
 public class LogoActivity extends AppCompatActivity {
 
-    private UrlApi urlApi = new UrlApi();
-    private MyAlertDialog dialog = new MyAlertDialog();
+    private final UrlApi urlApi = new UrlApi();
+    private final MyAlertDialog dialog = new MyAlertDialog();
     private final static String FILENAME = "data.txt";
     private final static String url = "http://128.199.210.91/device/";
     private final static int READ_BLOCK_SIZE = 100;
@@ -135,7 +134,7 @@ public class LogoActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect Unsuccess1");
+                    dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect UnSuccess1");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

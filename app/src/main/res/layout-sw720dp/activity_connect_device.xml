@@ -32,7 +32,6 @@
             android:hint="@string/SerialNumber_title"
             android:maxLines="1"
             android:padding="32dp"
-            android:singleLine="true"
             android:inputType="text"
             android:textSize="32sp" />
 

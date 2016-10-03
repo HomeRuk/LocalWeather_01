@@ -116,7 +116,7 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                         writer.flush();
                         writer.close();
                     } catch (IOException ioe) {
-                        dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect Unsuccess1");
+                        dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect UnSuccess1");
                         ioe.printStackTrace();
                     }
                     Toast.makeText(ConnectDeviceActivity.this, "Save successfully!", Toast.LENGTH_SHORT).show();
@@ -134,10 +134,10 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                     writer.flush();
                     writer.close();
                 } catch (IOException ioe) {
-                    dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect Unsuccess1");
+                    dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect UnSuccess1");
                     ioe.printStackTrace();
                 }
-                dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect Unsuccess2");
+                dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect UnSuccess2");
                 e.printStackTrace();
             }
         }
