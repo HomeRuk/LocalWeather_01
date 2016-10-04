@@ -19,6 +19,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <TextView
+            android:id="@+id/device_serialNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="@dimen/nav_header_text_size"
+            android:padding="0dp"
+            android:layout_alignParentBottom="true" />
+
         <Button
             android:id="@+id/text_Disconnect"
             android:layout_width="wrap_content"
@@ -26,19 +34,13 @@
             android:layout_alignParentEnd="true"
             android:onClick="onClickDisconnect"
             android:padding="0dp"
+            android:text="Disconnect"
+            android:textColor="@color/colorTextBase"
             android:textSize="@dimen/nav_header_text_size"
-            android:textColor="@color/colorTextName"
             android:background="@color/colorPrimary"
-            android:textAppearance="@android:style/TextAppearance.Material.Medium" />
+            android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title" />
 
-        <TextView
-            android:id="@+id/device_serialNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:textSize="@dimen/nav_header_text_size"
-            android:text="@string/dis_connect"
-            android:padding="0dp"
-            android:layout_alignParentBottom="true" />
+
     </RelativeLayout>
 
 </LinearLayout>
