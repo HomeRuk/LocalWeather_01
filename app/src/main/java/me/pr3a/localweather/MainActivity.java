@@ -167,8 +167,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         switch (id) {
             case R.id.nav_main:
-               /* Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);*/
                 finish();
                 startActivity(getIntent());
                 break;
@@ -177,12 +175,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Intent intent = new Intent(MainActivity.this, DeviceActivity.class);
                     intent.putExtra("P_SerialNumber", DataSerialNumber);
                     startActivity(intent);
-                    //finish();
                 }
                 break;
             case R.id.nav_location:
                 break;
             case R.id.nav_setting:
+                if (DataSerialNumber != null) {
+                    Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                    intent.putExtra("P_SerialNumber", DataSerialNumber);
+                    startActivity(intent);
+                }
                 break;
             default:
                 break;
@@ -350,8 +352,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } catch (JSONException e) {
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found");
                 e.printStackTrace();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Program Stop");
                 e.printStackTrace();
             }

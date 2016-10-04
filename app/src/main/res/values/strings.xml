@@ -34,4 +34,5 @@
     <string name="deawer_Setting">Setting</string>
     <string name="tx_serialnumber">SerialNumber</string>
     <string name="item_refresh">Refresh</string>
+    <string name="saveThreshold">Save</string>
 </resources>
