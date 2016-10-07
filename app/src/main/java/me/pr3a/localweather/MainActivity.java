@@ -178,6 +178,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 break;
             case R.id.nav_location:
+                if (DataSerialNumber != null) {
+                    Intent intent = new Intent(MainActivity.this, LocationActivity.class);
+                    startActivity(intent);
+                }
                 break;
             case R.id.nav_setting:
                 if (DataSerialNumber != null) {

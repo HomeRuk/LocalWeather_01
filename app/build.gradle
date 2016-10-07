@@ -10,12 +10,17 @@ android {
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    dexOptions {
+        incremental true
+        javaMaxHeapSize "4g"
     }
 }
 
@@ -29,4 +34,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-appindexing:9.6.1'
     compile 'com.google.android.gms:play-services-location:9.6.1'
     compile 'com.google.android.gms:play-services-maps:9.6.1'
+    compile ('io.nlopez.smartlocation:library:3.2.7') {
+        transitive = false
+    }
 }

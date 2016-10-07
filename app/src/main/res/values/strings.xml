@@ -35,4 +35,7 @@
     <string name="tx_serialnumber">SerialNumber</string>
     <string name="item_refresh">Refresh</string>
     <string name="saveThreshold">Save</string>
+
+    <!-- Button view -->
+    <string name="bt_save">Save</string>
 </resources>
