@@ -42,9 +42,9 @@
             android:background="@color/colorPrimaryDark"
             android:text="@string/button_connect"
             android:textColor="@color/colorTextBase"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:onClick="onButtonConnect" />
 
     </LinearLayout>
-
 
 </RelativeLayout>

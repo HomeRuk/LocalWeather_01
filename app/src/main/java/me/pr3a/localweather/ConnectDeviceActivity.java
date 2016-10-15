@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -33,7 +32,6 @@ public class ConnectDeviceActivity extends AppCompatActivity {
     private final static String FILENAME = "data.txt";
     private final static String url = "http://128.199.210.91/device/";
     //private final static int READ_BLOCK_SIZE = 100;
-    private Button buttonConnect;
     EditText editSerial;
 
     @Override
@@ -42,7 +40,6 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_connect_device);
 
         bindWidgets();
-        onButtonConnect();
     }
 
     private boolean isNetworkConnected() {
@@ -52,32 +49,26 @@ public class ConnectDeviceActivity extends AppCompatActivity {
     }
 
     private void bindWidgets() {
-        buttonConnect = (Button) findViewById(R.id.button_connect);
         editSerial = (EditText) findViewById(R.id.serial);
     }
 
-    private void onButtonConnect() {
-        // setOnClick
-        buttonConnect.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                serial = editSerial.getText().toString();
-                //Check serial is not empty
-                try {
-                    if (!serial.isEmpty()) {
-                        //Check Connect network
-                        if (isNetworkConnected()) {
-                            //Set url & LoadJSON
-                            urlApi.setUri(url, serial);
-                            new LoadJSON1().execute(urlApi.getUrl());
-                        } else
-                            dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
-                    } else
-                        Toast.makeText(ConnectDeviceActivity.this, "Please fill in Serial Number", Toast.LENGTH_SHORT).show();
-                } catch (Exception e) {
+    public void onButtonConnect(View view) {
+        serial = editSerial.getText().toString();
+        //Check serial is not empty
+        try {
+            if (!serial.isEmpty()) {
+                //Check Connect network
+                if (isNetworkConnected()) {
+                    //Set url & LoadJSON
+                    urlApi.setUri(url, serial);
+                    new LoadJSON1().execute(urlApi.getUrl());
+                } else
                     dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
-                }
-            }
-        });
+            } else
+                Toast.makeText(ConnectDeviceActivity.this, "Please fill in Serial Number", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
+        }
     }
 
     private class LoadJSON1 extends AsyncTask<String, Void, String> {

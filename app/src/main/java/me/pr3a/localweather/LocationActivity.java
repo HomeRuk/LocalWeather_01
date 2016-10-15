@@ -7,18 +7,23 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
+
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
+
 import android.Manifest;
 import android.view.WindowManager;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+
 import com.google.android.gms.maps.OnMapReadyCallback;
+
 import android.app.FragmentTransaction;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -85,7 +90,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         }
     }
 
-   private void showLocation(final Location location) {
+    private void showLocation(final Location location) {
         Log.e("APP", "showLocation");
         if (location != null) {
             final String text = "Latitude : " + location.getLatitude() + "\n" +

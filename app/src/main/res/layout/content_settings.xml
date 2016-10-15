@@ -31,8 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:max="100"
-            android:progress="70" />
+            android:max="100" />
 
         <TextView
             android:id="@+id/textView_seekBar"
@@ -50,7 +49,8 @@
             android:background="@color/colorPrimaryDark"
             android:text="@string/saveThreshold"
             android:textColor="@color/colorTextBase"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:onClick="onButtonSave" />
 
     </LinearLayout>
 
