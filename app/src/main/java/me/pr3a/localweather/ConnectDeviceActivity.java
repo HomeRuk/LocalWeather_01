@@ -31,7 +31,6 @@ public class ConnectDeviceActivity extends AppCompatActivity {
     private String serial;
     private final static String FILENAME = "data.txt";
     private final static String url = "http://128.199.210.91/device/";
-    //private final static int READ_BLOCK_SIZE = 100;
     EditText editSerial;
 
     @Override
@@ -54,7 +53,6 @@ public class ConnectDeviceActivity extends AppCompatActivity {
 
     public void onButtonConnect(View view) {
         serial = editSerial.getText().toString();
-        //Check serial is not empty
         try {
             if (!serial.isEmpty()) {
                 //Check Connect network
@@ -95,6 +93,7 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             Log.d("APP", "onPostExecute");
+            super.onPostExecute(result);
             try {
                 JSONObject json = new JSONObject(result);
                 String Serial = String.format("%s", json.getString("SerialNumber"));

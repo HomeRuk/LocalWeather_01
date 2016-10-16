@@ -38,4 +38,5 @@
 
     <!-- Button view -->
     <string name="bt_save">Save</string>
+    <string name="Button_disconnect">Disconnect</string>
 </resources>

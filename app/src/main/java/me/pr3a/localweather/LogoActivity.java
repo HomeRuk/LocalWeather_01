@@ -124,6 +124,7 @@ public class LogoActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
+            super.onPostExecute(result);
             Log.d("APP", "onPostExecute");
             try {
                 JSONObject json = new JSONObject(result);

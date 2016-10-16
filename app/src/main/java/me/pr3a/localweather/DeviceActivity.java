@@ -92,6 +92,7 @@ public class DeviceActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String result) {
+            super.onPostExecute(result);
             Log.d("APP", "onPostExecute");
             super.onPostExecute(result);
             try {

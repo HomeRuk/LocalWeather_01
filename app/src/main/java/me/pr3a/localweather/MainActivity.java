@@ -180,6 +180,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_location:
                 if (DataSerialNumber != null) {
                     Intent intent = new Intent(MainActivity.this, LocationActivity.class);
+                    intent.putExtra("P_SerialNumber", DataSerialNumber);
                     startActivity(intent);
                 }
                 break;
@@ -298,6 +299,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         @Override
         protected void onPostExecute(String result) {
+            super.onPostExecute(result);
             Log.d("APP", "onPostExecute");
             try {
                 JSONObject json = new JSONObject(result);

@@ -24,14 +24,14 @@ import okhttp3.Response;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private int progressChanged = 0;
     private final static String url1 = "http://128.199.210.91/device/";
-    private final UrlApi urlApi1 = new UrlApi();
     private final static String url2 = "http://128.199.210.91/device/update/threshold/";
+    private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
     private final MyAlertDialog dialog = new MyAlertDialog();
     private TextView txtSeekBar;
     private SeekBar seekBar;
+    private int progressChanged = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +89,7 @@ public class SettingsActivity extends AppCompatActivity {
             } else
                 Toast.makeText(this, "Please Select threshold", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
-            dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+            dialog.showProblemDialog(this, "Problem", "Save Fail");
         }
     }
 
