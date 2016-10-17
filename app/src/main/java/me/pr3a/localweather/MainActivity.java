@@ -21,6 +21,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beardedhen.androidbootstrap.TypefaceProvider;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStart() {
         super.onStart();
         Log.d("APP", "onStart");
+        drawerToggle.syncState();
     }
 
     // Event onCreate
@@ -94,6 +97,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Typeface weatherFont = Typeface.createFromAsset(getAssets(), "fonts/weather.ttf");
         weatherIcon = (TextView) findViewById(R.id.weather_icon);
         weatherIcon.setTypeface(weatherFont);
+
+        // set Bootstrap
+        // TypefaceProvider.registerDefaultIconSets();
 
         this.initToolbar();
         this.initInstances();
@@ -154,6 +160,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             conLoadJSON(0);
+            Toast.makeText(this, "Refresh Weather", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -166,10 +173,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.nav_main:
-                finish();
-                startActivity(getIntent());
-                break;
             case R.id.nav_DeviceProfile:
                 if (DataSerialNumber != null) {
                     Intent intent = new Intent(MainActivity.this, DeviceActivity.class);
@@ -189,6 +192,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
                     intent.putExtra("P_SerialNumber", DataSerialNumber);
                     startActivity(intent);
+                }
+                break;
+            case R.id.nav_exit:
+                try {
+                    FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                    writer.write("");
+                    writer.flush();
+                    writer.close();
+
+                    Toast.makeText(MainActivity.this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+                    Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    finish();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
                 }
                 break;
             default:
@@ -252,8 +274,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
-        else
+        else {
+            android.os.Process.killProcess(android.os.Process.myPid());
             finish();
+            super.onBackPressed();
+        }
     }
 
     private class LoadJSON extends AsyncTask<String, Void, String> {
@@ -274,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private String light = "";
         private String rain = "";
         private String updated_at = "";
-        // private String SerialNumber = "";
+        ;
         private String icon;
         private double tempDouble;
         private int rainInt, timeInt;

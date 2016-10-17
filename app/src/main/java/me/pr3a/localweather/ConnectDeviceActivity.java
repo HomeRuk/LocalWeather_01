@@ -12,6 +12,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.beardedhen.androidbootstrap.TypefaceProvider;
+
 import org.json.JSONObject;
 //import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,6 +41,8 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_connect_device);
 
         bindWidgets();
+        // set Bootstrap
+        TypefaceProvider.registerDefaultIconSets();
     }
 
     private boolean isNetworkConnected() {

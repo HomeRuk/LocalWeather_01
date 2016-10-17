@@ -29,7 +29,7 @@
     <string name="button_connect">Connect</string>
     <string name="dis_connect">Disconnect</string>
     <string name="deawer_Main">Main</string>
-    <string name="deawer_Device">Device</string>
+    <string name="deawer_Device">My Device</string>
     <string name="deawer_location">location</string>
     <string name="deawer_Setting">Setting</string>
     <string name="tx_serialnumber">SerialNumber</string>
@@ -39,4 +39,10 @@
     <!-- Button view -->
     <string name="bt_save">Save</string>
     <string name="Button_disconnect">Disconnect</string>
+    <string name="tx_address">Address</string>
+    <string name="tx_latitude">Latitude</string>
+    <string name="tx_longitude">Longitude</string>
+    <string name="tx_threshold">Threshold</string>
+    <string name="tx_create_at">Create_at</string>
+    <string name="tx_updated_at">Updated_at</string>
 </resources>

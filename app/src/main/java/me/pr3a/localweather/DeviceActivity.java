@@ -20,7 +20,7 @@ import okhttp3.Response;
 
 public class DeviceActivity extends AppCompatActivity {
 
-    private final static String url = "http://128.199.210.91/weather/";
+    private final static String url = "http://128.199.210.91/device/";
     private final UrlApi urlApi = new UrlApi();
     private final MyAlertDialog dialog = new MyAlertDialog();
 
@@ -71,6 +71,12 @@ public class DeviceActivity extends AppCompatActivity {
     private class LoadJSON2 extends AsyncTask<String, Void, String> {
 
         private final TextView deviceSerialNumber = (TextView) findViewById(R.id.txt_SerialNumber);
+        private final TextView deviceAddress = (TextView) findViewById(R.id.txt_Address);
+        private final TextView deviceLatitude = (TextView) findViewById(R.id.txt_Latitude);
+        private final TextView deviceLongitude = (TextView) findViewById(R.id.txt_Longitude);
+        private final TextView deviceThreshold = (TextView) findViewById(R.id.txt_Threshold);
+        private final TextView deviceCreate = (TextView) findViewById(R.id.txt_Create);
+        private final TextView deviceUpdated = (TextView) findViewById(R.id.txt_Updated);
 
         @Override
         protected String doInBackground(String... urls) {
@@ -95,10 +101,24 @@ public class DeviceActivity extends AppCompatActivity {
             super.onPostExecute(result);
             Log.d("APP", "onPostExecute");
             super.onPostExecute(result);
+
             try {
                 JSONObject json = new JSONObject(result);
+                System.out.println(result);
                 String Serial = String.format("%s", json.getString("SerialNumber"));
+                String address = String.format("%s", json.getString("address"));
+                String latitude = String.format("%s", json.getString("latitude"));
+                String longitude = String.format("%s", json.getString("longitude"));
+                String threshold = String.format("%s", json.getString("threshold"));
+                String created_at = String.format("%s", json.getString("created_at"));
+                String updated_at = String.format("%s", json.getString("updated_at"));
                 deviceSerialNumber.setText(String.format("%s", Serial));
+                deviceAddress.setText(String.format("%s", address));
+                deviceLatitude.setText(String.format("%s", latitude));
+                deviceLongitude.setText(String.format("%s", longitude));
+                deviceThreshold.setText(String.format("%s", threshold));
+                deviceCreate.setText(String.format("%s", created_at));
+                deviceUpdated.setText(String.format("%s", updated_at));
             } catch (Exception e) {
                 dialog.showProblemDialog(DeviceActivity.this, "Problem", "Not Connected Internet");
                 e.printStackTrace();

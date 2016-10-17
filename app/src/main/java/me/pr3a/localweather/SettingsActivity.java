@@ -49,7 +49,7 @@ public class SettingsActivity extends AppCompatActivity {
                 urlApi1.setUri(url1, PSerialNumber);
                 urlApi2.setUri(url2, PSerialNumber);
                 new LoadJSON2().execute(urlApi1.getUrl());
-            }
+            } else dialog.showProblemDialog(this, "Problem", "Extras");
         } else {
             dialog.showProblemDialog(SettingsActivity.this, "Problem", "Not Connected Network");
         }

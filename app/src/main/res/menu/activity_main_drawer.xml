@@ -3,10 +3,6 @@
 
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/nav_main"
-            android:icon="@drawable/ic_home_black_24dp"
-            android:title="@string/deawer_Main" />
-        <item
             android:id="@+id/nav_DeviceProfile"
             android:icon="@drawable/ic_dvr_black_24dp"
             android:title="@string/deawer_Device" />
@@ -18,5 +14,9 @@
             android:id="@+id/nav_setting"
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/deawer_Setting" />
+        <item
+            android:id="@+id/nav_exit"
+            android:icon="@drawable/ic_exit_to_app_button"
+            android:title="@string/Button_disconnect" />
     </group>
 </menu>

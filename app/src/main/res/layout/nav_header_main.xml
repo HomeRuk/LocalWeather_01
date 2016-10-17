@@ -37,7 +37,7 @@
             android:text="@string/Button_disconnect"
             android:textColor="@color/colorTextBase"
             android:textSize="@dimen/nav_header_text_size"
-            android:background="@color/colorPrimary"
+            android:background="@android:color/transparent"
             android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title" />
 
 
