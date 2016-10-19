@@ -24,7 +24,7 @@
     <string name="Text_cold">Cold</string>
 
     <!-- textview -->
-    <string name="login_title">Doo</string>
+    <string name="login_title">DooFon</string>
     <string name="SerialNumber_title">SerialNumber</string>
     <string name="button_connect">Connect</string>
     <string name="dis_connect">Disconnect</string>
