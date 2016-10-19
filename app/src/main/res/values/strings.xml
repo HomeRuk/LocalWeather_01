@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WeatherNow</string>
+    <string name="app_name">DooFon</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -24,7 +24,7 @@
     <string name="Text_cold">Cold</string>
 
     <!-- textview -->
-    <string name="login_title">WeatherNow</string>
+    <string name="login_title">Doo</string>
     <string name="SerialNumber_title">SerialNumber</string>
     <string name="button_connect">Connect</string>
     <string name="dis_connect">Disconnect</string>

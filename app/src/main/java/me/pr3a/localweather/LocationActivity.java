@@ -209,7 +209,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         mMap.clear();
         mMap.addMarker(new MarkerOptions()
                 .position(home)
-                .title("IOT WeatherNow")
+                .title("IOT DooFon")
                 .snippet(latitude + " , " + longitude)
         );
 

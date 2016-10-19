@@ -21,7 +21,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.beardedhen.androidbootstrap.TypefaceProvider;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onStart();
         Log.d("APP", "onStart");
         drawerToggle.syncState();
+        toastToken();
     }
 
     // Event onCreate
@@ -225,7 +226,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     //Show  Toolbar
     private void initToolbar() {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("LocalWeatherNow");
+        toolbar.setTitle("DooFon");
         //toolbar.setSubtitle("สภาวะอากาศปัจจุบัน");
         setSupportActionBar(toolbar);
     }
@@ -299,7 +300,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private String light = "";
         private String rain = "";
         private String updated_at = "";
-        ;
         private String icon;
         private double tempDouble;
         private int rainInt, timeInt;
@@ -413,5 +413,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             return sb.toString();
         }
+    }
+
+    public void toastToken(){
+        String token = FirebaseInstanceId.getInstance().getToken();
+        /*Toast.makeText(Notification.this,
+                "TOKEN = "+token,
+                Toast.LENGTH_LONG).show();*/
+        Log.d("TOKEN = ",""+token);
     }
 }

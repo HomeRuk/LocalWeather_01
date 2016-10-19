@@ -37,4 +37,8 @@ dependencies {
     compile('io.nlopez.smartlocation:library:3.2.7') {
         transitive = false
     }
+    compile 'com.google.firebase:firebase-core:9.6.1'
+    compile 'com.google.firebase:firebase-messaging:9.6.1'
 }
+apply plugin: 'com.google.gms.google-services'
+
