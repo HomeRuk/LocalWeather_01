@@ -15,7 +15,7 @@
             android:icon="@drawable/ic_settings_black_24dp"
             android:title="@string/deawer_Setting" />
         <item
-            android:id="@+id/nav_exit"
+            android:id="@+id/nav_disconnect"
             android:icon="@drawable/ic_exit_to_app_button"
             android:title="@string/Button_disconnect" />
     </group>

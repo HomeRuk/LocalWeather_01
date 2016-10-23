@@ -23,6 +23,7 @@
         android:layout_below="@+id/logo"
         android:layout_centerHorizontal="true"
         android:textColor="@color/colorTextBase"
-        android:textSize="35sp" />
+        android:textSize="36sp"
+        android:textStyle="normal|bold" />
 
 </RelativeLayout>

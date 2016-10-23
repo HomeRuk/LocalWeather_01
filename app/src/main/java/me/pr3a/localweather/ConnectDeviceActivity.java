@@ -32,7 +32,7 @@ public class ConnectDeviceActivity extends AppCompatActivity {
     private MyAlertDialog dialog = new MyAlertDialog();
     private String serial;
     private final static String FILENAME = "data.txt";
-    private final static String url = "http://128.199.210.91/device/";
+    private final static String url = "http://www.doofon.me/device/";
     EditText editSerial;
 
     @Override
@@ -41,8 +41,6 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_connect_device);
 
         bindWidgets();
-        // set Bootstrap
-        TypefaceProvider.registerDefaultIconSets();
     }
 
     private boolean isNetworkConnected() {
@@ -57,20 +55,16 @@ public class ConnectDeviceActivity extends AppCompatActivity {
 
     public void onButtonConnect(View view) {
         serial = editSerial.getText().toString();
-        try {
-            if (!serial.isEmpty()) {
-                //Check Connect network
-                if (isNetworkConnected()) {
-                    //Set url & LoadJSON
-                    urlApi.setUri(url, serial);
-                    new LoadJSON1().execute(urlApi.getUrl());
-                } else
-                    dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
+        if (!serial.isEmpty()) {
+            //Check Connect network
+            if (isNetworkConnected()) {
+                //Set url & LoadJSON
+                urlApi.setUri(url, serial);
+                new LoadJSON1().execute(urlApi.getUrl());
             } else
-                Toast.makeText(ConnectDeviceActivity.this, "Please fill in Serial Number", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
-        }
+                dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
+        } else
+            Toast.makeText(ConnectDeviceActivity.this, "Please fill in Serial Number", Toast.LENGTH_SHORT).show();
     }
 
     private class LoadJSON1 extends AsyncTask<String, Void, String> {
@@ -110,7 +104,7 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                         writer.flush();
                         writer.close();
                     } catch (IOException ioe) {
-                        dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect UnSuccess1");
+                        dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Writer Data fail");
                         ioe.printStackTrace();
                     }
                     Toast.makeText(ConnectDeviceActivity.this, "Save successfully!", Toast.LENGTH_SHORT).show();
@@ -128,10 +122,10 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                     writer.flush();
                     writer.close();
                 } catch (IOException ioe) {
-                    dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect UnSuccess1");
+                    dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Writer Data fail");
                     ioe.printStackTrace();
                 }
-                dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect UnSuccess2");
+                dialog.showConnectDialog(ConnectDeviceActivity.this, "Connect", "Connect UnSuccess");
                 e.printStackTrace();
             }
         }

@@ -24,8 +24,8 @@ import okhttp3.Response;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private final static String url1 = "http://128.199.210.91/device/";
-    private final static String url2 = "http://128.199.210.91/device/update/threshold/";
+    private final static String url1 = "http://www.doofon.me/device/";
+    private final static String url2 = "http://www.doofon.me/device/update/threshold/";
     private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
     private final MyAlertDialog dialog = new MyAlertDialog();

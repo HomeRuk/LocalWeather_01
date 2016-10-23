@@ -1,7 +1,6 @@
 package me.pr3a.localweather;
 
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
@@ -20,6 +19,8 @@ import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import me.pr3a.localweather.Helper.UrlApi;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -60,8 +61,8 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
     private double latitude = 0;
     private double longitude = 0;
     private final static String FILENAME = "location.txt";
-    private final static String url1 = "http://128.199.210.91/device/";
-    private final static String url2 = "http://128.199.210.91/device/update/location/";
+    private final static String url1 = "http://www.doofon.me/device/";
+    private final static String url2 = "http://www.doofon.me/device/update/location/";
     private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
     private final static int READ_BLOCK_SIZE = 100;
@@ -75,47 +76,46 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         //Display Toolbar
         this.showToolbar("Location", "");
 
-        if (isNetworkConnected()) {
-            String PSerialNumber;
-            Bundle bundle = getIntent().getExtras();
-            if (bundle != null) {
-                PSerialNumber = bundle.getString("P_SerialNumber");
-                //Set url & LoadJSON1
-                urlApi1.setUri(url1, PSerialNumber);
-                urlApi2.setUri(url2, PSerialNumber);
-                new LoadJSON1().execute(urlApi1.getUrl());
-                try {
-                    FileInputStream fIn = openFileInput(FILENAME);
-                    InputStreamReader reader = new InputStreamReader(fIn);
-                    char[] buffer = new char[READ_BLOCK_SIZE];
-                    String data = "";
-                    int charReadCount;
-                    while ((charReadCount = reader.read(buffer)) > 0) {
-                        String readString = String.copyValueOf(buffer, 0, charReadCount);
-                        data += readString;
-                        buffer = new char[READ_BLOCK_SIZE];
-                    }
-                    reader.close();
-
-                    JSONObject json = new JSONObject(data);
-                    String latitude2 = String.format("%s", json.getString("latitude"));
-                    String longitude2 = String.format("%s", json.getString("longitude"));
-                    // convect to double
-                    latitude = Double.parseDouble(latitude2);
-                    longitude = Double.parseDouble(longitude2);
-                } catch (Exception e) {
-                    e.printStackTrace();
+        String PSerialNumber;
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null && isNetworkConnected()) {
+            PSerialNumber = bundle.getString("P_SerialNumber");
+            //Set url & LoadJSON1
+            urlApi1.setUri(url1, PSerialNumber);
+            urlApi2.setUri(url2, PSerialNumber);
+            new LoadJSON1().execute(urlApi1.getUrl());
+            //read jsondata
+            try {
+                FileInputStream fIn = openFileInput(FILENAME);
+                InputStreamReader reader = new InputStreamReader(fIn);
+                char[] buffer = new char[READ_BLOCK_SIZE];
+                String data = "";
+                int charReadCount;
+                while ((charReadCount = reader.read(buffer)) > 0) {
+                    String readString = String.copyValueOf(buffer, 0, charReadCount);
+                    data += readString;
+                    buffer = new char[READ_BLOCK_SIZE];
                 }
-            } else dialog.showProblemDialog(this, "Problem", "Extras");
-        } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+                reader.close();
 
-        MapFragment mapFragment = MapFragment.newInstance();
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.add(R.id.fragment_map_container, mapFragment);
-        fragmentTransaction.commit();
-        mapFragment.getMapAsync(this);
-        // Keep the screen always on
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                JSONObject json = new JSONObject(data);
+                String latitude2 = String.format("%s", json.getString("latitude"));
+                String longitude2 = String.format("%s", json.getString("longitude"));
+                // convect to double
+                latitude = Double.parseDouble(latitude2);
+                longitude = Double.parseDouble(longitude2);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            //Map
+            MapFragment mapFragment = MapFragment.newInstance();
+            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+            fragmentTransaction.add(R.id.fragment_map_container, mapFragment);
+            fragmentTransaction.commit();
+            mapFragment.getMapAsync(this);
+            // Keep the screen always on
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
     }
 
     @Override
@@ -163,8 +163,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             SmartLocation.with(this)
                     .location(new LocationGooglePlayServicesWithFallbackProvider(this))
                     .start(this);
-        } else
-            Log.e("APP", "onStart fail");
+        } else Log.e("APP", "StartLocation fail");
     }
 
     private void showLocation(final Location location) {
@@ -174,25 +173,6 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                     "Latitude : " + location.getLatitude() + "\n" +
                     "Longitude : " + location.getLongitude() + "";
             Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
-
-            /* We are going to get the address for the current position
-            SmartLocation.with(this).geocoding().reverse(location, new OnReverseGeocodingListener() {
-                @Override
-                public void onAddressResolved(Location original, List<Address> results) {
-                    if (results.size() > 0) {
-                        Address result = results.get(0);
-                        StringBuilder builder = new StringBuilder(text);
-                        builder.append("\n[Address] ");
-                        List<String> addressElements = new ArrayList<>();
-                        for (int i = 0; i <= result.getMaxAddressLineIndex(); i++) {
-                            addressElements.add(result.getAddressLine(i));
-                        }
-                        builder.append(TextUtils.join(", ", addressElements));
-
-                        Toast.makeText(LocationActivity.this, builder.toString(), Toast.LENGTH_SHORT).show();
-                    }
-                }
-            });*/
         } else {
             Toast.makeText(this, "Null location", Toast.LENGTH_SHORT).show();
         }
@@ -213,12 +193,12 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                 .snippet(latitude + " , " + longitude)
         );
 
-        mMap.addCircle(new CircleOptions()
+       /* mMap.addCircle(new CircleOptions()
                 .center(home)
                 .radius(100)
                 .fillColor(0x333F51B5)
                 .strokeColor(Color.BLUE)
-        );
+        );*/
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(home, 15));
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 
@@ -240,42 +220,14 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
+            Toast.makeText(this, "Refresh Location", Toast.LENGTH_SHORT).show();
             finish();
             startActivity(getIntent());
-            Toast.makeText(this, "Refresh Location", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.action_save) {
-            try {
-                //Check Connect network
-                if (isNetworkConnected()) {
-                    this.onStart();
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            Log.d("APP", "doInBackground");
-                            try {
-                                RequestBody formBody = new FormBody.Builder()
-                                        .add("latitude", latitude + "")
-                                        .add("longitude", longitude + "")
-                                        .build();
-                                Request request = new Request.Builder()
-                                        .url(urlApi2.getUrl())
-                                        .post(formBody)
-                                        .build();
-                                OkHttpClient okHttpClient = new OkHttpClient();
-                                Response response = okHttpClient.newCall(request).execute();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        }
-                    }.execute();
-                    Toast.makeText(this, "Save Location", Toast.LENGTH_SHORT).show();
-                    this.intentDelay();
-                } else
-                    dialog.showProblemDialog(this, "Problem", "Not Connected Network");
-            } catch (Exception e) {
-                dialog.showProblemDialog(this, "Problem", "Save Fail");
-            }
+            //Check Connect network
+            if (isNetworkConnected()) {
+                this.saveLocation();
+            } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
         }
         return super.onOptionsItemSelected(item);
     }
@@ -307,9 +259,38 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                 finish();
                 startActivity(getIntent());
             }
-        }, 20000);
+        }, 15000);
     }
 
+    private void saveLocation(){
+        try {
+            RequestBody formBody = new FormBody.Builder()
+                    .add("latitude", latitude + "")
+                    .add("longitude", longitude + "")
+                    .build();
+            Request request = new Request.Builder()
+                    .url(urlApi2.getUrl())
+                    .post(formBody)
+                    .build();
+            OkHttpClient okHttpClient = new OkHttpClient();
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (!response.isSuccessful())
+                        throw new IOException("Unexpected code " + response);
+                }
+            });
+            Toast.makeText(LocationActivity.this, "Save Location", Toast.LENGTH_SHORT).show();
+            intentDelay();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     private class LoadJSON1 extends AsyncTask<String, Void, String> {
 
         @Override
@@ -342,9 +323,9 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                 writer.write(result);
                 writer.flush();
                 writer.close();
-            } catch (IOException ioe) {
-                dialog.showConnectDialog(LocationActivity.this, "Connect", "Connect UnSuccess1");
-                ioe.printStackTrace();
+            } catch (Exception e) {
+                dialog.showConnectDialog(LocationActivity.this, "Connect", "Connect UnSuccess");
+                e.printStackTrace();
             }
             //Toast.makeText(LocationActivity.this, "Save successfully!", Toast.LENGTH_SHORT).show();
         }

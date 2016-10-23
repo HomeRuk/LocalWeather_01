@@ -26,19 +26,17 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import me.pr3a.localweather.Helper.UrlApi;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -51,40 +49,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private final MyAlertDialog dialog = new MyAlertDialog();
     private String DataSerialNumber = "";
 
-    // Event onStop
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d("APP", "onDestroy");
-    }
-
-    // Event onStop
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("APP", "onStop");
-    }
-
-    // Event onResume
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("APP", "onResume");
-    }
-
-    // Event onPause
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d("APP", "onPause");
-    }
-
     // Event onStart
     @Override
     protected void onStart() {
         super.onStart();
         Log.d("APP", "onStart");
-        drawerToggle.syncState();
         toastToken();
     }
 
@@ -99,10 +68,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         weatherIcon = (TextView) findViewById(R.id.weather_icon);
         weatherIcon.setTypeface(weatherFont);
 
-        // set Bootstrap
-        // TypefaceProvider.registerDefaultIconSets();
-
-        this.initToolbar();
+        //Show Toolbar
+        this.showToolbar("DooFon","");
+        //Show DrawerLayout and drawerToggle
         this.initInstances();
 
         // NavigationView
@@ -195,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     startActivity(intent);
                 }
                 break;
-            case R.id.nav_exit:
+            case R.id.nav_disconnect:
                 try {
                     FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
                     OutputStreamWriter writer = new OutputStreamWriter(fOut);
@@ -223,14 +191,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    //Show  Toolbar
-    private void initToolbar() {
+    //Show Toolbar
+    private void showToolbar(String title, String subTitle) {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("DooFon");
-        //toolbar.setSubtitle("สภาวะอากาศปัจจุบัน");
+        toolbar.setTitle(title);
+        toolbar.setSubtitle(subTitle);
         setSupportActionBar(toolbar);
-    }
 
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+    }
     //Show DrawerLayout and drawerToggle
     private void initInstances() {
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -307,19 +281,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         @Override
         protected String doInBackground(String... urls) {
             Log.d("APP", "doInBackground");
-            String strResult = "";
-            if (isNetworkConnected()) {
-                try {
-                    URL url = new URL(urls[0]);
-                    HttpURLConnection con = (HttpURLConnection) url.openConnection();
-                    strResult = readStream(con.getInputStream());
-                } catch (Exception e) {
-                    e.printStackTrace();
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request.Builder builder = new Request.Builder();
+            Request request = builder.url(urls[0]).build();
+            try {
+                Response response = okHttpClient.newCall(request).execute();
+                if (response.isSuccessful()) {
+                    return response.body().string();
+                } else {
+                    return "Not Success - code : " + response.code();
                 }
-            } else {
-                dialog.showProblemDialog(MainActivity.this, "Problem", "Not Connected Network");
+            } catch (Exception e) {
+                e.printStackTrace();
+                return "Error - " + e.getMessage();
             }
-            return strResult;
         }
 
         @Override
@@ -388,30 +363,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 e.printStackTrace();
             }
 
-        }
-
-        // Read text json first to last
-        private String readStream(InputStream in) {
-            BufferedReader reader = null;
-            StringBuilder sb = new StringBuilder();
-            try {
-                reader = new BufferedReader(new InputStreamReader(in));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    sb.append(line);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-            return sb.toString();
         }
     }
 

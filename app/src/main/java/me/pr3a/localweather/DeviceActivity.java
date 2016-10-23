@@ -20,7 +20,7 @@ import okhttp3.Response;
 
 public class DeviceActivity extends AppCompatActivity {
 
-    private final static String url = "http://128.199.210.91/device/";
+    private final static String url = "http://www.doofon.me/device/";
     private final UrlApi urlApi = new UrlApi();
     private final MyAlertDialog dialog = new MyAlertDialog();
 
@@ -29,7 +29,7 @@ public class DeviceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_device);
         //Display Toolbar
-        this.showToolbar("Device", "");
+        this.showToolbar("My Device", "");
 
         /*SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy:MM:dd");
         dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT+7"));
@@ -104,7 +104,7 @@ public class DeviceActivity extends AppCompatActivity {
 
             try {
                 JSONObject json = new JSONObject(result);
-                System.out.println(result);
+                //System.out.println(result);
                 String Serial = String.format("%s", json.getString("SerialNumber"));
                 String address = String.format("%s", json.getString("address"));
                 String latitude = String.format("%s", json.getString("latitude"));
@@ -120,7 +120,7 @@ public class DeviceActivity extends AppCompatActivity {
                 deviceCreate.setText(String.format("%s", created_at));
                 deviceUpdated.setText(String.format("%s", updated_at));
             } catch (Exception e) {
-                dialog.showProblemDialog(DeviceActivity.this, "Problem", "Not Connected Internet");
+                dialog.showProblemDialog(DeviceActivity.this, "Problem", "Read Data fail");
                 e.printStackTrace();
             }
         }

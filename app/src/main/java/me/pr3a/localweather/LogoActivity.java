@@ -135,8 +135,8 @@ public class LogoActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                    dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect UnSuccess1");
-                }
+                dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect UnSuccess");
+            }
             } catch (Exception e) {
                 e.printStackTrace();
                 try {
