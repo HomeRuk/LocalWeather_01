@@ -42,7 +42,7 @@
     <string name="tx_address">Address</string>
     <string name="tx_latitude">Latitude</string>
     <string name="tx_longitude">Longitude</string>
-    <string name="tx_threshold">Threshold</string>
+    <string name="tx_threshold">PredictThreshold</string>
     <string name="tx_create_at">Create_at</string>
     <string name="tx_updated_at">Updated_at</string>
     <string name="deawer_main">Main</string>
