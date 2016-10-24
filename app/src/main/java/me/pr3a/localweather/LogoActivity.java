@@ -46,41 +46,45 @@ public class LogoActivity extends AppCompatActivity {
         weatherIcon.setText(getString(R.string.weather_rain));
 
         if (isNetworkConnected()) {
-            try {
-                FileInputStream fIn = openFileInput(FILENAME);
-                InputStreamReader reader = new InputStreamReader(fIn);
-
-                char[] buffer = new char[READ_BLOCK_SIZE];
-                String data = "";
-                int charReadCount;
-                while ((charReadCount = reader.read(buffer)) > 0) {
-                    String readString = String.copyValueOf(buffer, 0, charReadCount);
-                    data += readString;
-                    buffer = new char[READ_BLOCK_SIZE];
-                }
-                reader.close();
-                if (!(data.equals(""))) {
-                    //Set url & LoadJSON
-                    urlApi.setUri(url, data);
-                    new LoadJSON0().execute(urlApi.getUrl());
-                } else {
-                    intentDelay();
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                try {
-                    FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
-                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
-                    writer.write("");
-                    writer.flush();
-                    writer.close();
-                } catch (IOException ioe) {
-                    ioe.printStackTrace();
-                }
-                intentDelay();
-            }
+            readData();
         } else {
             dialog.showProblemDialog(LogoActivity.this, "Problem", "Not Connected Network");
+        }
+    }
+
+    private void readData() {
+        try {
+            FileInputStream fIn = openFileInput(FILENAME);
+            InputStreamReader reader = new InputStreamReader(fIn);
+
+            char[] buffer = new char[READ_BLOCK_SIZE];
+            String data = "";
+            int charReadCount;
+            while ((charReadCount = reader.read(buffer)) > 0) {
+                String readString = String.copyValueOf(buffer, 0, charReadCount);
+                data += readString;
+                buffer = new char[READ_BLOCK_SIZE];
+            }
+            reader.close();
+            if (!(data.equals(""))) {
+                //Set url & LoadJSON
+                urlApi.setUri(url, data);
+                new LoadJSON0().execute(urlApi.getUrl());
+            } else {
+                intentDelay();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                writer.write("");
+                writer.flush();
+                writer.close();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+            intentDelay();
         }
     }
 
@@ -135,8 +139,8 @@ public class LogoActivity extends AppCompatActivity {
                     startActivity(intent);
                     finish();
                 } else {
-                dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect UnSuccess");
-            }
+                    dialog.showConnectDialog(LogoActivity.this, "Connect", "Connect UnSuccess");
+                }
             } catch (Exception e) {
                 e.printStackTrace();
                 try {

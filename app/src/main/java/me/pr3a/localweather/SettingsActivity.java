@@ -1,18 +1,31 @@
 package me.pr3a.localweather;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONObject;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import me.pr3a.localweather.Helper.UrlApi;
@@ -22,12 +35,15 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class SettingsActivity extends AppCompatActivity {
+public class SettingsActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener {
 
+    private Toolbar toolbar;
+    private final static String FILENAME = "data.txt";
     private final static String url1 = "http://www.doofon.me/device/";
     private final static String url2 = "http://www.doofon.me/device/update/threshold/";
     private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
+    private final static int READ_BLOCK_SIZE = 100;
     private final MyAlertDialog dialog = new MyAlertDialog();
     private TextView txtSeekBar;
     private SeekBar seekBar;
@@ -37,24 +53,41 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        //Display Toolbar
         this.showToolbar("Setting", "");
+        //Show DrawerLayout and drawerToggle
+        this.initInstances();
+
         txtSeekBar = (TextView) findViewById(R.id.textView_seekBar);
 
         if (isNetworkConnected()) {
-            String PSerialNumber;
-            Bundle bundle = getIntent().getExtras();
-            if (bundle != null) {
-                PSerialNumber = bundle.getString("P_SerialNumber");
-                //Set url
-                urlApi1.setUri(url1, PSerialNumber);
-                urlApi2.setUri(url2, PSerialNumber);
-                new LoadJSON2().execute(urlApi1.getUrl());
-            } else dialog.showProblemDialog(this, "Problem", "Extras");
+            this.readData();
+            new LoadJSON2().execute(urlApi1.getUrl());
         } else {
             dialog.showProblemDialog(SettingsActivity.this, "Problem", "Not Connected Network");
         }
 
         this.onSeekBar();
+    }
+
+    public void onClickDisconnect(View view) {
+        try {
+            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+            writer.write("");
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void onButtonSave(View view) {
@@ -77,7 +110,7 @@ public class SettingsActivity extends AppCompatActivity {
                                         .post(formBody)
                                         .build();
                                 OkHttpClient okHttpClient = new OkHttpClient();
-                                Response response = okHttpClient.newCall(request).execute();
+                                okHttpClient.newCall(request).execute();
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -117,18 +150,113 @@ public class SettingsActivity extends AppCompatActivity {
         return cm.getActiveNetworkInfo() != null;
     }
 
+    //Show Toolbar
     private void showToolbar(String title, String subTitle) {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(title);
         toolbar.setSubtitle(subTitle);
         setSupportActionBar(toolbar);
+    }
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    //Show DrawerLayout and drawerToggle
+    private void initInstances() {
+        // NavigationView
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+    }
+
+    // Select Menu Navigation
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.nav_main:
                 finish();
+                Intent intentDevice = new Intent(this, MainActivity.class);
+                startActivity(intentDevice);
+                break;
+            case R.id.nav_DeviceProfile:
+                finish();
+                Intent intentLocation = new Intent(this, DeviceActivity.class);
+                startActivity(intentLocation);
+                break;
+            case R.id.nav_location:
+                finish();
+                Intent intentSettings = new Intent(this, LocationActivity.class);
+                startActivity(intentSettings);
+                break;
+            case R.id.nav_setting:
+                finish();
+                startActivity(getIntent());
+                break;
+            case R.id.nav_disconnect:
+                try {
+                    FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                    writer.write("");
+                    writer.flush();
+                    writer.close();
+
+                    Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+                    Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    finish();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+                break;
+            default:
+                break;
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+
+    //Read SerialNumber
+    private void readData() {
+        try {
+            FileInputStream fIn = openFileInput(FILENAME);
+            InputStreamReader reader = new InputStreamReader(fIn);
+
+            char[] buffer = new char[READ_BLOCK_SIZE];
+            String data = "";
+            int charReadCount;
+            while ((charReadCount = reader.read(buffer)) > 0) {
+                String readString = String.copyValueOf(buffer, 0, charReadCount);
+                data += readString;
+                buffer = new char[READ_BLOCK_SIZE];
             }
-        });
+            reader.close();
+            if (!(data.equals(""))) {
+                //Set url
+                urlApi1.setUri(url1, data);
+                urlApi2.setUri(url2, data);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                writer.write("");
+                writer.flush();
+                writer.close();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
     }
 
     private class LoadJSON2 extends AsyncTask<String, Void, String> {

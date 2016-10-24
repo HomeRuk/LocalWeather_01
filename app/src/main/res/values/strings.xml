@@ -45,4 +45,9 @@
     <string name="tx_threshold">Threshold</string>
     <string name="tx_create_at">Create_at</string>
     <string name="tx_updated_at">Updated_at</string>
+    <string name="deawer_main">Main</string>
+    <string name="header_my_device">My Device</string>
+    <string name="header_setting">Setting</string>
+    <string name="header_location">location</string>
+    <string name="header_main">Main</string>
 </resources>

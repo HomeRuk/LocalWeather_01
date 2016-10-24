@@ -26,8 +26,10 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -41,13 +43,12 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar toolbar;
-    private ActionBarDrawerToggle drawerToggle;
     private TextView weatherIcon;
     private static final String url = "http://128.199.210.91/weather/";
     private static final String FILENAME = "data.txt";
+    private final static int READ_BLOCK_SIZE = 100;
     private final UrlApi urlApi = new UrlApi();
     private final MyAlertDialog dialog = new MyAlertDialog();
-    private String DataSerialNumber = "";
 
     // Event onStart
     @Override
@@ -69,21 +70,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         weatherIcon.setTypeface(weatherFont);
 
         //Show Toolbar
-        this.showToolbar("DooFon","");
+        this.showToolbar("DooFon", "");
         //Show DrawerLayout and drawerToggle
         this.initInstances();
 
-        // NavigationView
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            DataSerialNumber = bundle.getString("Data_SerialNumber");
-            //set url
-            urlApi.setUri(url, DataSerialNumber);
-        }
-
+        this.readData();
         // Connect loadJson choice 1 setTime
         this.conLoadJSON(1);
     }
@@ -96,25 +87,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             writer.flush();
             writer.close();
 
-            Toast.makeText(MainActivity.this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
             Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
-        } catch (IOException ioe) {
-            ioe.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    // SyncState icon drawerToggle
+    /* SyncState icon drawerToggle
     @Override
     public void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
         Log.d("APP", "onPostCreate");
         drawerToggle.syncState();
-    }
+    }*/
 
     // Create MenuBar on Toolbar
     @Override
@@ -142,26 +133,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         switch (id) {
+            case R.id.nav_main:
+                finish();
+                startActivity(getIntent());
+                break;
             case R.id.nav_DeviceProfile:
-                if (DataSerialNumber != null) {
-                    Intent intent = new Intent(MainActivity.this, DeviceActivity.class);
-                    intent.putExtra("P_SerialNumber", DataSerialNumber);
-                    startActivity(intent);
-                }
+                finish();
+                Intent intentDevice = new Intent(this, DeviceActivity.class);
+                startActivity(intentDevice);
                 break;
             case R.id.nav_location:
-                if (DataSerialNumber != null) {
-                    Intent intent = new Intent(MainActivity.this, LocationActivity.class);
-                    intent.putExtra("P_SerialNumber", DataSerialNumber);
-                    startActivity(intent);
-                }
+                finish();
+                Intent intentLocation = new Intent(this, LocationActivity.class);
+                startActivity(intentLocation);
                 break;
             case R.id.nav_setting:
-                if (DataSerialNumber != null) {
-                    Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                    intent.putExtra("P_SerialNumber", DataSerialNumber);
-                    startActivity(intent);
-                }
+                finish();
+                Intent intentSettings = new Intent(this, SettingsActivity.class);
+                startActivity(intentSettings);
                 break;
             case R.id.nav_disconnect:
                 try {
@@ -171,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     writer.flush();
                     writer.close();
 
-                    Toast.makeText(MainActivity.this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
                     Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                             | Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -197,20 +186,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         toolbar.setTitle(title);
         toolbar.setSubtitle(subTitle);
         setSupportActionBar(toolbar);
-
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
     }
+
     //Show DrawerLayout and drawerToggle
     private void initInstances() {
+        // NavigationView
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        // DrawerLayout
         DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(drawerToggle);
-        //drawerToggle.syncState();
+        drawerToggle.syncState();
     }
 
     // Connect Load Json
@@ -256,6 +243,46 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    public void toastToken() {
+        String token = FirebaseInstanceId.getInstance().getToken();
+        /*Toast.makeText(Notification.this,
+                "TOKEN = "+token,
+                Toast.LENGTH_LONG).show();*/
+        Log.d("TOKEN = ", "" + token);
+    }
+
+    private void readData() {
+        try {
+            FileInputStream fIn = openFileInput(FILENAME);
+            InputStreamReader reader = new InputStreamReader(fIn);
+
+            char[] buffer = new char[READ_BLOCK_SIZE];
+            String data = "";
+            int charReadCount;
+            while ((charReadCount = reader.read(buffer)) > 0) {
+                String readString = String.copyValueOf(buffer, 0, charReadCount);
+                data += readString;
+                buffer = new char[READ_BLOCK_SIZE];
+            }
+            reader.close();
+            if (!(data.equals(""))) {
+                //Set url & LoadJSON
+                urlApi.setUri(url, data);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                writer.write("");
+                writer.flush();
+                writer.close();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+    }
+
     private class LoadJSON extends AsyncTask<String, Void, String> {
 
         private final TextView statusUpdate = (TextView) findViewById(R.id.textview_statusUpdate);
@@ -265,7 +292,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private final TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
         private final TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
         private final TextView weatherLight = (TextView) findViewById(R.id.weather_light);
-        private final TextView deviceSerialNumber = (TextView) findViewById(R.id.device_serialNumber);
+        //private final TextView deviceSerialNumber = (TextView) findViewById(R.id.main_serialNumber);
 
         private String temp = "";
         private String humidity = "";
@@ -275,6 +302,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private String rain = "";
         private String updated_at = "";
         private String icon;
+        //private String SerialNumber = "";
         private double tempDouble;
         private int rainInt, timeInt;
 
@@ -310,6 +338,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 light += String.format("%s", json.getString("light"));
                 rain += String.format("%s", json.getString("rain"));
                 updated_at += String.format("%s", json.getString("updated_at"));
+                //SerialNumber += String.format("%s", json.getString("SerialNumber"));
+
                 String time = updated_at.substring(11, 13);
 
                 tempDouble = Double.parseDouble(temp);
@@ -353,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 weatherPressure.setText(String.format("Pressure: %s", pressure));
                 weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
                 weatherLight.setText(String.format("Light: %s", light));
-                deviceSerialNumber.setText(DataSerialNumber);
+                //deviceSerialNumber.setText(String.format("%s", SerialNumber));
 
             } catch (JSONException e) {
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found");
@@ -366,11 +396,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public void toastToken(){
-        String token = FirebaseInstanceId.getInstance().getToken();
-        /*Toast.makeText(Notification.this,
-                "TOKEN = "+token,
-                Toast.LENGTH_LONG).show();*/
-        Log.d("TOKEN = ",""+token);
-    }
+
 }

@@ -1,17 +1,23 @@
 package me.pr3a.localweather;
 
 import android.content.Context;
+import android.content.Intent;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -36,7 +42,6 @@ import android.support.v4.content.ContextCompat;
 import com.google.android.gms.maps.OnMapReadyCallback;
 
 import android.app.FragmentTransaction;
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -54,15 +59,17 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-public class LocationActivity extends AppCompatActivity implements OnLocationUpdatedListener, OnMapReadyCallback {
+public class LocationActivity extends AppCompatActivity implements OnLocationUpdatedListener, OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener  {
 
-    private static final int LOCATION_PERMISSION_ID = 1001;
+    private Toolbar toolbar;
     private GoogleMap mMap;
     private double latitude = 0;
     private double longitude = 0;
-    private final static String FILENAME = "location.txt";
+    private static final String FILENAME = "data.txt";
+    private final static String FILENAME2 = "location.txt";
     private final static String url1 = "http://www.doofon.me/device/";
     private final static String url2 = "http://www.doofon.me/device/update/location/";
+    private static final int LOCATION_PERMISSION_ID = 1001;
     private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
     private final static int READ_BLOCK_SIZE = 100;
@@ -75,18 +82,16 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         setContentView(R.layout.activity_location);
         //Display Toolbar
         this.showToolbar("Location", "");
+        //Show DrawerLayout and drawerToggle
+        this.initInstances();
 
-        String PSerialNumber;
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null && isNetworkConnected()) {
-            PSerialNumber = bundle.getString("P_SerialNumber");
-            //Set url & LoadJSON1
-            urlApi1.setUri(url1, PSerialNumber);
-            urlApi2.setUri(url2, PSerialNumber);
+        if (isNetworkConnected()) {
+            //Read SerialNumber
+            this.readData();
             new LoadJSON1().execute(urlApi1.getUrl());
-            //read jsondata
+            //read location
             try {
-                FileInputStream fIn = openFileInput(FILENAME);
+                FileInputStream fIn = openFileInput(FILENAME2);
                 InputStreamReader reader = new InputStreamReader(fIn);
                 char[] buffer = new char[READ_BLOCK_SIZE];
                 String data = "";
@@ -99,8 +104,10 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                 reader.close();
 
                 JSONObject json = new JSONObject(data);
+                String Serial = String.format("%s", json.getString("SerialNumber"));
                 String latitude2 = String.format("%s", json.getString("latitude"));
                 String longitude2 = String.format("%s", json.getString("longitude"));
+
                 // convect to double
                 latitude = Double.parseDouble(latitude2);
                 longitude = Double.parseDouble(longitude2);
@@ -116,6 +123,26 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             // Keep the screen always on
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+    }
+
+    public void onClickDisconnect(View view) {
+        try {
+            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+            writer.write("");
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -158,6 +185,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         showLocation(location);
     }
 
+
     private void startLocation() {
         if (SmartLocation.with(this).location().state().locationServicesEnabled()) {
             SmartLocation.with(this)
@@ -165,6 +193,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                     .start(this);
         } else Log.e("APP", "StartLocation fail");
     }
+
 
     private void showLocation(final Location location) {
         Log.e("APP", "showLocation");
@@ -177,6 +206,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             Toast.makeText(this, "Null location", Toast.LENGTH_SHORT).show();
         }
     }
+
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -208,12 +238,14 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         mMap.setMyLocationEnabled(true);
     }
 
+
     // Create MenuBar on Toolbar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_location_toolbar, menu);
         return true;
     }
+
 
     // Click button refresh
     @Override
@@ -232,23 +264,97 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         return super.onOptionsItemSelected(item);
     }
 
+
+    //Show Toolbar
     private void showToolbar(String title, String subTitle) {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(title);
         toolbar.setSubtitle(subTitle);
         setSupportActionBar(toolbar);
+    }
 
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+    //Show DrawerLayout and drawerToggle
+    private void initInstances() {
+        // NavigationView
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+    }
+
+    // Select Menu Navigation
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.nav_main:
                 finish();
-            }
-        });
+                Intent intentDevice = new Intent(this, MainActivity.class);
+                startActivity(intentDevice);
+                break;
+            case R.id.nav_DeviceProfile:
+                finish();
+                Intent intentLocation = new Intent(this, DeviceActivity.class);
+                startActivity(intentLocation);
+                break;
+            case R.id.nav_location:
+                finish();
+                startActivity(getIntent());
+                break;
+            case R.id.nav_setting:
+                finish();
+                Intent intentSettings = new Intent(this, SettingsActivity.class);
+                startActivity(intentSettings);
+                break;
+            case R.id.nav_disconnect:
+                try {
+                    FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                    OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                    writer.write("");
+                    writer.flush();
+                    writer.close();
+
+                    Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+                    Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                            | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                            | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                    finish();
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                }
+                break;
+            default:
+                break;
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
     }
 
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null;
+    }
+
+    //Button back
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
+        else {
+            android.os.Process.killProcess(android.os.Process.myPid());
+            finish();
+            super.onBackPressed();
+        }
     }
 
     private void intentDelay() {
@@ -261,6 +367,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             }
         }, 15000);
     }
+
 
     private void saveLocation(){
         try {
@@ -291,6 +398,41 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             e.printStackTrace();
         }
     }
+
+    //Read SerialNumber
+    private void readData() {
+        try {
+            FileInputStream fIn = openFileInput(FILENAME);
+            InputStreamReader reader = new InputStreamReader(fIn);
+
+            char[] buffer = new char[READ_BLOCK_SIZE];
+            String data = "";
+            int charReadCount;
+            while ((charReadCount = reader.read(buffer)) > 0) {
+                String readString = String.copyValueOf(buffer, 0, charReadCount);
+                data += readString;
+                buffer = new char[READ_BLOCK_SIZE];
+            }
+            reader.close();
+            if (!(data.equals(""))) {
+                //Set url & LoadJSON
+                urlApi1.setUri(url1, data);
+                urlApi2.setUri(url2, data);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            try {
+                FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                OutputStreamWriter writer = new OutputStreamWriter(fOut);
+                writer.write("");
+                writer.flush();
+                writer.close();
+            } catch (IOException ioe) {
+                ioe.printStackTrace();
+            }
+        }
+    }
+
     private class LoadJSON1 extends AsyncTask<String, Void, String> {
 
         @Override
@@ -318,7 +460,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             super.onPostExecute(result);
             try {
                 //Writer location
-                FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+                FileOutputStream fOut = openFileOutput(FILENAME2, MODE_PRIVATE);
                 OutputStreamWriter writer = new OutputStreamWriter(fOut);
                 writer.write(result);
                 writer.flush();

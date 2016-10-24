@@ -13,17 +13,18 @@
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/nav_header_vertical_spacing"
         android:paddingTop="@dimen/nav_header_vertical_spacing"
-        android:src="@drawable/ic_dvr_black_24dp" />
+        android:src="@drawable/ic_settings_black_24dp" />
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
         <TextView
-            android:id="@+id/main_serialNumber"
+            android:id="@+id/setting_serialNumber"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:textSize="@dimen/nav_header_text_size"
+            android:text="@string/header_setting"
             android:padding="0dp"
             android:layout_alignParentBottom="true" />
 
@@ -39,7 +40,6 @@
             android:textSize="@dimen/nav_header_text_size"
             android:background="@android:color/transparent"
             android:textAppearance="@style/TextAppearance.Widget.AppCompat.Toolbar.Title" />
-
 
     </RelativeLayout>
 
