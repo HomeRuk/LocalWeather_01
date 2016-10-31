@@ -53,51 +53,13 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         if (isNetworkConnected()) {
             this.readData();
             //LoadJSON
-            new LoadJSON2().execute(urlApi.getUrl());
+            new LoadJSON2().execute(urlApi.getUri());
         } else {
             dialog.showProblemDialog(DeviceActivity.this, "Problem", "Not Connected Network");
         }
         /*SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy:MM:dd");
         dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT+7"));
         System.out.println(dateFormatGmt.format(new Date()) + "");*/
-    }
-
-    public void onClickDisconnect(View view) {
-        try {
-            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
-            OutputStreamWriter writer = new OutputStreamWriter(fOut);
-            writer.write("");
-            writer.flush();
-            writer.close();
-
-            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
-            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            finish();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-    //Show Toolbar
-    private void showToolbar(String title, String subTitle) {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(title);
-        toolbar.setSubtitle(subTitle);
-        setSupportActionBar(toolbar);
-    }
-
-    //Show DrawerLayout and drawerToggle
-    private void initInstances() {
-        // NavigationView
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
     }
 
     // Select Menu Navigation
@@ -155,11 +117,6 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         return true;
     }
 
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
-    }
-
     //Button back
     @Override
     public void onBackPressed() {
@@ -173,6 +130,53 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         }
     }
 
+    // Button Disconnect
+    public void onClickDisconnect(View view) {
+        try {
+            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+            writer.write("");
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Show Toolbar
+    private void showToolbar(String title, String subTitle) {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(title);
+        toolbar.setSubtitle(subTitle);
+        setSupportActionBar(toolbar);
+    }
+
+    //Show DrawerLayout and drawerToggle
+    private void initInstances() {
+        // NavigationView
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+    }
+
+    // Check Connect Network
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+    // Read SerialNumber
     private void readData() {
         try {
             FileInputStream fIn = openFileInput(FILENAME);
@@ -205,10 +209,10 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         }
     }
 
+    // AsyncTask Load Data Device
     private class LoadJSON2 extends AsyncTask<String, Void, String> {
 
         private final TextView deviceSerialNumber = (TextView) findViewById(R.id.txt_SerialNumber);
-        private final TextView deviceAddress = (TextView) findViewById(R.id.txt_Address);
         private final TextView deviceLatitude = (TextView) findViewById(R.id.txt_Latitude);
         private final TextView deviceLongitude = (TextView) findViewById(R.id.txt_Longitude);
         private final TextView deviceThreshold = (TextView) findViewById(R.id.txt_Threshold);
@@ -243,7 +247,6 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
                 JSONObject json = new JSONObject(result);
                 //System.out.println(result);
                 String Serial = String.format("%s", json.getString("SerialNumber"));
-                String address = String.format("%s", json.getString("address"));
                 String latitude = String.format("%s", json.getString("latitude"));
                 String longitude = String.format("%s", json.getString("longitude"));
                 String threshold = String.format("%s", json.getString("threshold"));
@@ -251,7 +254,6 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
                 String updated_at = String.format("%s", json.getString("updated_at"));
 
                 deviceSerialNumber.setText(String.format("%s", Serial));
-                deviceAddress.setText(String.format("%s", address));
                 deviceLatitude.setText(String.format("%s", latitude));
                 deviceLongitude.setText(String.format("%s", longitude));
                 deviceThreshold.setText(String.format("%s", threshold));
@@ -263,4 +265,5 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
             }
         }
     }
+
 }

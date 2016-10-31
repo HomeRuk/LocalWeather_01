@@ -12,8 +12,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.beardedhen.androidbootstrap.TypefaceProvider;
-
 import org.json.JSONObject;
 //import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -43,6 +41,7 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         bindWidgets();
     }
 
+    // Check Connect Network
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
@@ -53,6 +52,7 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         editSerial = (EditText) findViewById(R.id.serial);
     }
 
+    // Button Connect
     public void onButtonConnect(View view) {
         serial = editSerial.getText().toString();
         if (!serial.isEmpty()) {
@@ -60,13 +60,14 @@ public class ConnectDeviceActivity extends AppCompatActivity {
             if (isNetworkConnected()) {
                 //Set url & LoadJSON
                 urlApi.setUri(url, serial);
-                new LoadJSON1().execute(urlApi.getUrl());
+                new LoadJSON1().execute(urlApi.getUri());
             } else
                 dialog.showProblemDialog(ConnectDeviceActivity.this, "Problem", "Not Connected Network");
         } else
             Toast.makeText(ConnectDeviceActivity.this, "Please fill in Serial Number", Toast.LENGTH_SHORT).show();
     }
 
+    // AsyncTask Load Data Device
     private class LoadJSON1 extends AsyncTask<String, Void, String> {
 
         @Override

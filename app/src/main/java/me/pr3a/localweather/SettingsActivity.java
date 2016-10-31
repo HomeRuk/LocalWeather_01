@@ -35,12 +35,12 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class SettingsActivity extends AppCompatActivity implements  NavigationView.OnNavigationItemSelectedListener {
+public class SettingsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar toolbar;
     private final static String FILENAME = "data.txt";
     private final static String url1 = "http://www.doofon.me/device/";
-    private final static String url2 = "http://www.doofon.me/device/update/threshold/";
+    private final static String url2 = "http://www.doofon.me/device/update/threshold";
     private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
     private final static int READ_BLOCK_SIZE = 100;
@@ -48,125 +48,26 @@ public class SettingsActivity extends AppCompatActivity implements  NavigationVi
     private TextView txtSeekBar;
     private SeekBar seekBar;
     private int progressChanged = 0;
+    private String sid = "Ruk";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         //Display Toolbar
-        this.showToolbar("Setting", "");
+        this.showToolbar("Setting", "Predict Threshold");
         //Show DrawerLayout and drawerToggle
         this.initInstances();
 
         txtSeekBar = (TextView) findViewById(R.id.textView_seekBar);
-
         if (isNetworkConnected()) {
             this.readData();
-            new LoadJSON2().execute(urlApi1.getUrl());
+            new LoadJSON2().execute(urlApi1.getUri());
         } else {
             dialog.showProblemDialog(SettingsActivity.this, "Problem", "Not Connected Network");
         }
 
         this.onSeekBar();
-    }
-
-    public void onClickDisconnect(View view) {
-        try {
-            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
-            OutputStreamWriter writer = new OutputStreamWriter(fOut);
-            writer.write("");
-            writer.flush();
-            writer.close();
-
-            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
-            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            finish();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void onButtonSave(View view) {
-        //Check serial is not empty
-        try {
-            if (progressChanged != 0) {
-                //Check Connect network
-                if (isNetworkConnected()) {
-                    dialog.showConnectDialog(SettingsActivity.this, "Save", "Success");
-                    new AsyncTask<Void, Void, Void>() {
-                        @Override
-                        protected Void doInBackground(Void... voids) {
-                            Log.d("APP", "doInBackground");
-                            try {
-                                RequestBody formBody = new FormBody.Builder()
-                                        .add("threshold", progressChanged + "")
-                                        .build();
-                                Request request = new Request.Builder()
-                                        .url(urlApi2.getUrl())
-                                        .post(formBody)
-                                        .build();
-                                OkHttpClient okHttpClient = new OkHttpClient();
-                                okHttpClient.newCall(request).execute();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                            return null;
-                        }
-                    }.execute();
-                } else
-                    dialog.showProblemDialog(this, "Problem", "Not Connected Network");
-            } else
-                Toast.makeText(this, "Please Select threshold", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            dialog.showProblemDialog(this, "Problem", "Save Fail");
-        }
-    }
-
-    private void onSeekBar() {
-        seekBar = (SeekBar) findViewById(R.id.seek_Bar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progressChanged = progress;
-                txtSeekBar.setText("Threshold : " + progressChanged + "%");
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                Toast.makeText(SettingsActivity.this, "Threshold : " + progressChanged + "%", Toast.LENGTH_SHORT).show();
-                System.out.println(progressChanged);
-            }
-        });
-    }
-
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
-    }
-
-    //Show Toolbar
-    private void showToolbar(String title, String subTitle) {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(title);
-        toolbar.setSubtitle(subTitle);
-        setSupportActionBar(toolbar);
-    }
-
-    //Show DrawerLayout and drawerToggle
-    private void initInstances() {
-        // NavigationView
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
     }
 
     // Select Menu Navigation
@@ -224,6 +125,107 @@ public class SettingsActivity extends AppCompatActivity implements  NavigationVi
         return true;
     }
 
+    // Button Disconnect
+    public void onClickDisconnect(View view) {
+        try {
+            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+            writer.write("");
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Button Save threshold
+    public void onButtonSave(View view) {
+        //Check serial is not empty
+        if (progressChanged != 0) {
+            //Check Connect network
+            if (isNetworkConnected()) {
+                view.setEnabled(false);
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        Log.d("APP", "doInBackground");
+                        try {
+                            RequestBody formBody = new FormBody.Builder()
+                                    .add("SerialNumber", urlApi2.getApikey())
+                                    .add("threshold", progressChanged + "")
+                                    .add("sid", sid)
+                                    .build();
+                            Request request = new Request.Builder()
+                                    .url(urlApi2.getUrl())
+                                    .post(formBody)
+                                    .build();
+                            OkHttpClient okHttpClient = new OkHttpClient();
+                            okHttpClient.newCall(request).execute();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            dialog.showProblemDialog(SettingsActivity.this, "Problem", "Save Fail");
+                        }
+                        return null;
+                    }
+                }.execute();
+                dialog.showConnectDialog(SettingsActivity.this, "Save", "Success");
+                view.setEnabled(true);
+            } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+        } else Toast.makeText(this, "Please Select threshold", Toast.LENGTH_SHORT).show();
+    }
+
+    // SeekBar
+    private void onSeekBar() {
+        seekBar = (SeekBar) findViewById(R.id.seek_Bar);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progressChanged = progress;
+                txtSeekBar.setText("Threshold : " + progressChanged + "%");
+            }
+
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                Toast.makeText(SettingsActivity.this, "Threshold : " + progressChanged + "%", Toast.LENGTH_SHORT).show();
+                System.out.println(progressChanged);
+            }
+        });
+    }
+
+    // Check Connect Network
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        return cm.getActiveNetworkInfo() != null;
+    }
+
+    // Show Toolbar
+    private void showToolbar(String title, String subTitle) {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(title);
+        toolbar.setSubtitle(subTitle);
+        setSupportActionBar(toolbar);
+    }
+
+    // Show DrawerLayout and drawerToggle
+    private void initInstances() {
+        // NavigationView
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+    }
 
     //Read SerialNumber
     private void readData() {
@@ -240,7 +242,8 @@ public class SettingsActivity extends AppCompatActivity implements  NavigationVi
                 buffer = new char[READ_BLOCK_SIZE];
             }
             reader.close();
-            if (!(data.equals(""))) {
+            if (data.equals("")) dialog.showProblemDialog(this, "Problem", "Data Empty");
+            else {
                 //Set url
                 urlApi1.setUri(url1, data);
                 urlApi2.setUri(url2, data);
@@ -259,6 +262,7 @@ public class SettingsActivity extends AppCompatActivity implements  NavigationVi
         }
     }
 
+    // AsyncTask Load Data Device
     private class LoadJSON2 extends AsyncTask<String, Void, String> {
 
         @Override

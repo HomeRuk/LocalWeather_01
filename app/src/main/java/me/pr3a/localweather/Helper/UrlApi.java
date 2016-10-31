@@ -12,7 +12,15 @@ public class UrlApi {
         this.uri = url + apiKey;
     }
 
-    public String getUrl() {
+    public String getUri() {
         return this.uri;
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
+    public String getApikey() {
+        return this.apiKey;
     }
 }

@@ -36,27 +36,26 @@ import java.util.TimerTask;
 
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import me.pr3a.localweather.Helper.UrlApi;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar toolbar;
     private TextView weatherIcon;
-    private static final String url = "http://128.199.210.91/weather/";
+    private static final String url1 = "http://www.doofon.me/weather/";
+    private static final String url2 = "http://www.doofon.me/device/update/FCMtoken";
     private static final String FILENAME = "data.txt";
     private final static int READ_BLOCK_SIZE = 100;
-    private final UrlApi urlApi = new UrlApi();
+    private final UrlApi urlApi1 = new UrlApi();
+    private final UrlApi urlApi2 = new UrlApi();
     private final MyAlertDialog dialog = new MyAlertDialog();
-
-    // Event onStart
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d("APP", "onStart");
-        toastToken();
-    }
+    private String sid = "Ruk";
 
     // Event onCreate
     @Override
@@ -75,37 +74,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.initInstances();
 
         this.readData();
+
+        String token = FirebaseInstanceId.getInstance().getToken();
+        Log.d("TOKEN", "=" + token);
+        this.updateToken(urlApi2.getApikey(), token);
         // Connect loadJson choice 1 setTime
         this.conLoadJSON(1);
     }
-
-    public void onClickDisconnect(View view) {
-        try {
-            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
-            OutputStreamWriter writer = new OutputStreamWriter(fOut);
-            writer.write("");
-            writer.flush();
-            writer.close();
-
-            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
-            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            finish();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /* SyncState icon drawerToggle
-    @Override
-    public void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-        Log.d("APP", "onPostCreate");
-        drawerToggle.syncState();
-    }*/
 
     // Create MenuBar on Toolbar
     @Override
@@ -153,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(intentSettings);
                 break;
             case R.id.nav_disconnect:
+                this.updateToken(urlApi2.getApikey(), "0");
                 try {
                     FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
                     OutputStreamWriter writer = new OutputStreamWriter(fOut);
@@ -180,7 +156,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    //Show Toolbar
+    // Button back
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START))
+            drawer.closeDrawer(GravityCompat.START);
+        else {
+            android.os.Process.killProcess(android.os.Process.myPid());
+            finish();
+            super.onBackPressed();
+        }
+    }
+
+    // Button Disconnect
+    public void onClickDisconnect(View view) {
+        this.updateToken(urlApi2.getApikey(), "0");
+        try {
+            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+            writer.write("");
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Show Toolbar
     private void showToolbar(String title, String subTitle) {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(title);
@@ -188,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
     }
 
-    //Show DrawerLayout and drawerToggle
+    // Show DrawerLayout and drawerToggle
     private void initInstances() {
         // NavigationView
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -209,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 TimerTask taskNew = new TimerTask() {
                     public void run() {
                         // series
-                        new LoadJSON().execute(urlApi.getUrl());
+                        new LoadJSON().execute(urlApi1.getUri());
                         // Parallel
                         // new LoadJSON().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,urlApi.getUrl());
                     }
@@ -217,40 +228,51 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Timer timer = new Timer();
                 timer.scheduleAtFixedRate(taskNew, 5 * 100, 300 * 1000);
             } else {
-                // series
-                new LoadJSON().execute(urlApi.getUrl());
+                new LoadJSON().execute(urlApi1.getUri());
             }
         } else {
-            dialog.showProblemDialog(this, "Problem", "Not Connected Network1");
+            dialog.showProblemDialog(this, "Problem", "Not Connected Network");
         }
     }
 
+    // Check Connect Network
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null;
     }
 
-    //Button back
-    @Override
-    public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START))
-            drawer.closeDrawer(GravityCompat.START);
-        else {
-            android.os.Process.killProcess(android.os.Process.myPid());
-            finish();
-            super.onBackPressed();
+    // Update Token FCM
+    private void updateToken(String Apikey, String token) {
+        try {
+            RequestBody formBody = new FormBody.Builder()
+                    .add("SerialNumber", Apikey + "")
+                    .add("FCMtoken", token + "")
+                    .add("sid", sid)
+                    .build();
+            Request request = new Request.Builder()
+                    .url(urlApi2.getUrl())
+                    .post(formBody)
+                    .build();
+            OkHttpClient okHttpClient = new OkHttpClient();
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (!response.isSuccessful())
+                        throw new IOException("Unexpected code " + response);
+                }
+            });
+            Toast.makeText(this, "UPDATE Token", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    public void toastToken() {
-        String token = FirebaseInstanceId.getInstance().getToken();
-        /*Toast.makeText(Notification.this,
-                "TOKEN = "+token,
-                Toast.LENGTH_LONG).show();*/
-        Log.d("TOKEN = ", "" + token);
-    }
-
+    // Read SerialNumber
     private void readData() {
         try {
             FileInputStream fIn = openFileInput(FILENAME);
@@ -267,7 +289,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             reader.close();
             if (!(data.equals(""))) {
                 //Set url & LoadJSON
-                urlApi.setUri(url, data);
+                urlApi1.setUri(url1, data);
+                urlApi2.setUri(url2, data);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -283,6 +306,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    // AsyncTask Load Data Weather
     private class LoadJSON extends AsyncTask<String, Void, String> {
 
         private final TextView statusUpdate = (TextView) findViewById(R.id.textview_statusUpdate);
@@ -386,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //deviceSerialNumber.setText(String.format("%s", SerialNumber));
 
             } catch (JSONException e) {
-                dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found");
+                dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found\nPlase Check Device");
                 e.printStackTrace();
             } catch (Exception e) {
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Program Stop");
@@ -395,6 +419,4 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         }
     }
-
-
 }

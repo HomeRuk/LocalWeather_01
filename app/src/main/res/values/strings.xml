@@ -30,7 +30,7 @@
     <string name="dis_connect">Disconnect</string>
     <string name="deawer_Main">Main</string>
     <string name="deawer_Device">My Device</string>
-    <string name="deawer_location">location</string>
+    <string name="deawer_location">Device location</string>
     <string name="deawer_Setting">Setting</string>
     <string name="tx_serialnumber">SerialNumber</string>
     <string name="item_refresh">Refresh</string>
@@ -48,6 +48,7 @@
     <string name="deawer_main">Main</string>
     <string name="header_my_device">My Device</string>
     <string name="header_setting">Setting</string>
-    <string name="header_location">location</string>
+    <string name="header_location">Device location</string>
     <string name="header_main">Main</string>
+    <string name="drawer_predictthreshold">Predict Threshold</string>
 </resources>

@@ -52,6 +52,7 @@ public class LogoActivity extends AppCompatActivity {
         }
     }
 
+    // Read SerialNumber
     private void readData() {
         try {
             FileInputStream fIn = openFileInput(FILENAME);
@@ -69,7 +70,7 @@ public class LogoActivity extends AppCompatActivity {
             if (!(data.equals(""))) {
                 //Set url & LoadJSON
                 urlApi.setUri(url, data);
-                new LoadJSON0().execute(urlApi.getUrl());
+                new LoadJSON0().execute(urlApi.getUri());
             } else {
                 intentDelay();
             }
@@ -88,6 +89,7 @@ public class LogoActivity extends AppCompatActivity {
         }
     }
 
+    //Delay to page ConnectDevice
     private void intentDelay() {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -99,12 +101,14 @@ public class LogoActivity extends AppCompatActivity {
         }, 1500);
     }
 
+    // Check Connect Network
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
+    // AsyncTask Load Data Device
     private class LoadJSON0 extends AsyncTask<String, Void, String> {
 
         @Override

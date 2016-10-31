@@ -33,21 +33,6 @@
             android:textSize="18sp" />
 
         <TextView
-            android:id="@+id/txt_Add"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/tx_address"
-            android:textSize="24sp"
-            android:textStyle="normal|bold"
-            android:textColor="@android:color/black" />
-
-        <TextView
-            android:id="@+id/txt_Address"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="18sp" />
-
-        <TextView
             android:id="@+id/txt_Lat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

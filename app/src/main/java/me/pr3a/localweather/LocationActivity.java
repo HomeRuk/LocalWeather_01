@@ -17,7 +17,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import io.nlopez.smartlocation.OnLocationUpdatedListener;
@@ -47,7 +46,7 @@ import android.support.v7.app.AppCompatActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.model.CircleOptions;
+//import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -59,16 +58,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
-public class LocationActivity extends AppCompatActivity implements OnLocationUpdatedListener, OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener  {
+public class LocationActivity extends AppCompatActivity implements OnLocationUpdatedListener, OnMapReadyCallback, NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar toolbar;
     private GoogleMap mMap;
     private double latitude = 0;
     private double longitude = 0;
+    private String Serial = "Device ";
+    private String sid = "Ruk";
     private static final String FILENAME = "data.txt";
     private final static String FILENAME2 = "location.txt";
     private final static String url1 = "http://www.doofon.me/device/";
-    private final static String url2 = "http://www.doofon.me/device/update/location/";
+    private final static String url2 = "http://www.doofon.me/device/update/location";
     private static final int LOCATION_PERMISSION_ID = 1001;
     private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
@@ -77,18 +78,19 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.e("APP", "onCreate");
+        Log.i("APP", "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
         //Display Toolbar
-        this.showToolbar("Location", "");
+        this.showToolbar("Setting", "Device Location");
         //Show DrawerLayout and drawerToggle
         this.initInstances();
 
         if (isNetworkConnected()) {
             //Read SerialNumber
             this.readData();
-            new LoadJSON1().execute(urlApi1.getUrl());
+            //Load SerialNumber
+            new LoadJSON1().execute(urlApi1.getUri());
             //read location
             try {
                 FileInputStream fIn = openFileInput(FILENAME2);
@@ -104,140 +106,84 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                 reader.close();
 
                 JSONObject json = new JSONObject(data);
-                String Serial = String.format("%s", json.getString("SerialNumber"));
+                Serial += String.format("%s", json.getString("SerialNumber"));
                 String latitude2 = String.format("%s", json.getString("latitude"));
                 String longitude2 = String.format("%s", json.getString("longitude"));
 
-                // convect to double
+                // Convect to double
                 latitude = Double.parseDouble(latitude2);
                 longitude = Double.parseDouble(longitude2);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            //Map
-            MapFragment mapFragment = MapFragment.newInstance();
-            FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-            fragmentTransaction.add(R.id.fragment_map_container, mapFragment);
-            fragmentTransaction.commit();
-            mapFragment.getMapAsync(this);
-            // Keep the screen always on
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            // SET MAP
+            this.setMap();
         } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
     }
 
-    public void onClickDisconnect(View view) {
-        try {
-            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
-            OutputStreamWriter writer = new OutputStreamWriter(fOut);
-            writer.write("");
-            writer.flush();
-            writer.close();
-
-            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
-            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
-                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            finish();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
+    // Activity onStart is Rule Start Service Location
     @Override
     protected void onStart() {
-        Log.e("APP", "onStart");
+        Log.i("APP", "onStart");
         super.onStart();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_ID);
             return;
         }
-        startLocation();
+        this.startLocation();
     }
 
+    // Activity onStop is Rule Stop Service Location
     @Override
     protected void onStop() {
-        Log.e("APP", "onStop");
+        Log.i("APP", "onStop");
         super.onStop();
         SmartLocation.with(this)
                 .location()
                 .stop();
     }
 
+    //Request Permission Location
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.i("APP", "onRequestPermissionsResult");
         if (requestCode == LOCATION_PERMISSION_ID && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            startLocation();
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            mMap.setMyLocationEnabled(true);
-        }
-    }
-
-    @Override
-    public void onLocationUpdated(Location location) {
-        Log.e("APP", "onLocationUpdated");
-
-        latitude = location.getLatitude();
-        longitude = location.getLongitude();
-        showLocation(location);
-    }
-
-
-    private void startLocation() {
-        if (SmartLocation.with(this).location().state().locationServicesEnabled()) {
-            SmartLocation.with(this)
-                    .location(new LocationGooglePlayServicesWithFallbackProvider(this))
-                    .start(this);
-        } else Log.e("APP", "StartLocation fail");
-    }
-
-
-    private void showLocation(final Location location) {
-        Log.e("APP", "showLocation");
-        if (location != null) {
-            final String text = "Current Location \n" +
-                    "Latitude : " + location.getLatitude() + "\n" +
-                    "Longitude : " + location.getLongitude() + "";
-            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(this, "Null location", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        if (latitude == 0 || longitude == 0) {
             finish();
             startActivity(getIntent());
         }
-        LatLng home = new LatLng(latitude, longitude);
-        mMap.clear();
-        mMap.addMarker(new MarkerOptions()
-                .position(home)
-                .title("IOT DooFon")
-                .snippet(latitude + " , " + longitude)
-        );
+    }
 
-       /* mMap.addCircle(new CircleOptions()
-                .center(home)
-                .radius(100)
-                .fillColor(0x333F51B5)
-                .strokeColor(Color.BLUE)
-        );*/
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(home, 15));
-        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+    // Update Current Location
+    @Override
+    public void onLocationUpdated(Location location) {
+        Log.i("APP", "onLocationUpdated");
+        latitude = location.getLatitude();
+        longitude = location.getLongitude();
+    }
 
+    // Marker Map
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        Log.i("APP", "onMapReady");
+        mMap = googleMap;
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         mMap.setMyLocationEnabled(true);
-    }
+        if (latitude == 0 || longitude == 0) {
+            return;
+        }
 
+        LatLng lo = new LatLng(latitude, longitude);
+        mMap.clear();
+        mMap.addMarker(new MarkerOptions()
+                .position(lo)
+                .title(Serial)
+                .snippet(latitude + " , " + longitude)
+        );
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lo, 15));
+        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+    }
 
     // Create MenuBar on Toolbar
     @Override
@@ -245,7 +191,6 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         getMenuInflater().inflate(R.menu.activity_location_toolbar, menu);
         return true;
     }
-
 
     // Click button refresh
     @Override
@@ -262,26 +207,6 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
         }
         return super.onOptionsItemSelected(item);
-    }
-
-
-    //Show Toolbar
-    private void showToolbar(String title, String subTitle) {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(title);
-        toolbar.setSubtitle(subTitle);
-        setSupportActionBar(toolbar);
-    }
-
-    //Show DrawerLayout and drawerToggle
-    private void initInstances() {
-        // NavigationView
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawerLayout.addDrawerListener(drawerToggle);
-        drawerToggle.syncState();
     }
 
     // Select Menu Navigation
@@ -339,12 +264,13 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         return true;
     }
 
+    // Check Connect Network
     private boolean isNetworkConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         return cm.getActiveNetworkInfo() != null;
     }
 
-    //Button back
+    // Button back
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -357,6 +283,82 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         }
     }
 
+    // Button Disconnect
+    public void onClickDisconnect(View view) {
+        try {
+            FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
+            OutputStreamWriter writer = new OutputStreamWriter(fOut);
+            writer.write("");
+            writer.flush();
+            writer.close();
+
+            Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
+            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(i);
+            finish();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Set Google Map
+    private void setMap() {
+        //Map
+        MapFragment mapFragment = MapFragment.newInstance();
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.add(R.id.fragment_map_container, mapFragment);
+        fragmentTransaction.commit();
+        mapFragment.getMapAsync(this);
+        // Keep the screen always on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
+
+    // Start LocationService
+    private void startLocation() {
+        Log.i("APP", "StartLocation fail");
+        if (SmartLocation.with(this).location().state().locationServicesEnabled()) {
+            SmartLocation.with(this)
+                    .location(new LocationGooglePlayServicesWithFallbackProvider(this))
+                    .start(this);
+        } else Log.e("APP", "StartLocation fail");
+    }
+
+    // Show Current Location (Latitude,Longitude)
+    private void showLocation(final Location location) {
+        Log.i("APP", "showLocation");
+        if (location != null) {
+            final String text = "Current Location \n" +
+                    "Latitude : " + location.getLatitude() + "\n" +
+                    "Longitude : " + location.getLongitude() + "";
+            Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Null location", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // Show Toolbar
+    private void showToolbar(String title, String subTitle) {
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(title);
+        toolbar.setSubtitle(subTitle);
+        setSupportActionBar(toolbar);
+    }
+
+    // Show DrawerLayout and drawerToggle
+    private void initInstances() {
+        // NavigationView
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.addDrawerListener(drawerToggle);
+        drawerToggle.syncState();
+    }
+
+    // Delay
     private void intentDelay() {
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -365,15 +367,17 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                 finish();
                 startActivity(getIntent());
             }
-        }, 15000);
+        }, 20000);
     }
 
-
-    private void saveLocation(){
+    // UPDATE Location to DB
+    private void saveLocation() {
         try {
             RequestBody formBody = new FormBody.Builder()
+                    .add("SerialNumber", urlApi2.getApikey())
                     .add("latitude", latitude + "")
                     .add("longitude", longitude + "")
+                    .add("sid", sid)
                     .build();
             Request request = new Request.Builder()
                     .url(urlApi2.getUrl())
@@ -399,7 +403,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         }
     }
 
-    //Read SerialNumber
+    // Read SerialNumber
     private void readData() {
         try {
             FileInputStream fIn = openFileInput(FILENAME);
@@ -433,11 +437,11 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         }
     }
 
+    // AsyncTask Load Data Device
     private class LoadJSON1 extends AsyncTask<String, Void, String> {
-
         @Override
         protected String doInBackground(String... urls) {
-            Log.d("APP", "doInBackground");
+            Log.i("APP", "doInBackground");
             OkHttpClient okHttpClient = new OkHttpClient();
             Request.Builder builder = new Request.Builder();
             Request request = builder.url(urls[0]).build();
@@ -456,7 +460,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
 
         @Override
         protected void onPostExecute(String result) {
-            Log.d("APP", "onPostExecute");
+            Log.i("APP", "onPostExecute");
             super.onPostExecute(result);
             try {
                 //Writer location
