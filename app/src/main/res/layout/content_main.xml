@@ -83,7 +83,6 @@
         android:padding="@dimen/padding_weather"
         android:textColor="@color/colorTextBase"
         android:textSize="18sp"
-        android:textAllCaps="true"
         android:textStyle="normal|bold" />
 
     <TextView
