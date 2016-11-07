@@ -316,6 +316,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private final TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
         private final TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
         private final TextView weatherLight = (TextView) findViewById(R.id.weather_light);
+        private final TextView weatherProbabilityRain = (TextView) findViewById(R.id.weather_probabilityRain);
         //private final TextView deviceSerialNumber = (TextView) findViewById(R.id.main_serialNumber);
 
         private String temp = "";
@@ -327,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private String updated_at = "";
         private String icon;
         //private String SerialNumber = "";
+        private String probabilityRain = "";
         private double tempDouble;
         private int rainInt, timeInt;
 
@@ -362,6 +364,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 light += String.format("%s", json.getString("light"));
                 rain += String.format("%s", json.getString("rain"));
                 updated_at += String.format("%s", json.getString("updated_at"));
+                probabilityRain += String.format("%s", json.getString("PredictPercent"));
                 //SerialNumber += String.format("%s", json.getString("SerialNumber"));
 
                 String time = updated_at.substring(11, 13);
@@ -407,6 +410,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 weatherPressure.setText(String.format("Pressure: %s", pressure));
                 weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
                 weatherLight.setText(String.format("Light: %s", light));
+                if((probabilityRain!=null) && (probabilityRain!="") && (probabilityRain!="null")) {
+                    weatherProbabilityRain.setText(String.format("Probability Rain : %s", probabilityRain));
+                }
                 //deviceSerialNumber.setText(String.format("%s", SerialNumber));
 
             } catch (JSONException e) {
