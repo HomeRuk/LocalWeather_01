@@ -410,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 weatherPressure.setText(String.format("Pressure: %s", pressure));
                 weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
                 weatherLight.setText(String.format("Light: %s", light));
-                if ((probabilityRain != null) && (probabilityRain.equals("")) && (probabilityRain.equals("null"))) {
+                if ((probabilityRain != null) && (!(probabilityRain.equals(""))) && (!(probabilityRain.equals("null")))) {
                     weatherProbabilityRain.setText(String.format("Probability Rain: %s %%", probabilityRain));
                 }
                 //deviceSerialNumber.setText(String.format("%s", SerialNumber));
