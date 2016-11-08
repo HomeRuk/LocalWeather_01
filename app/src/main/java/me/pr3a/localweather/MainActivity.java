@@ -407,22 +407,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 statusUpdate.setText(String.format("Last update %s", updated_at));
                 weatherTemp.setText(String.format("%s ℃", tempDouble));
                 weatherHumidity.setText(String.format("Humidity: %s %%", humidity));
-                weatherPressure.setText(String.format("Pressure: %s hPa", pressure));
+                weatherPressure.setText(String.format("Pressure: %s", pressure));
                 weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
                 weatherLight.setText(String.format("Light: %s", light));
-                if((probabilityRain!=null) && (probabilityRain!="") && (probabilityRain!="null")) {
-                    weatherProbabilityRain.setText(String.format("Probability Rain in front 2 hours: %s %%", probabilityRain));
+                if ((probabilityRain != null) && (probabilityRain.equals("")) && (probabilityRain.equals("null"))) {
+                    weatherProbabilityRain.setText(String.format("Probability Rain: %s %%", probabilityRain));
                 }
                 //deviceSerialNumber.setText(String.format("%s", SerialNumber));
 
             } catch (JSONException e) {
-                dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found\nPlase Check Device");
+                dialog.showProblemDialog(MainActivity.this, "Problem", "Data Not Found\nPlease Check Device");
                 e.printStackTrace();
             } catch (Exception e) {
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Program Stop");
                 e.printStackTrace();
             }
-
         }
     }
 }
