@@ -1,8 +1,6 @@
 package me.pr3a.localweather;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -26,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+import me.pr3a.localweather.Helper.MyNetwork;
 import me.pr3a.localweather.Helper.UrlApi;
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import okhttp3.OkHttpClient;
@@ -36,7 +35,7 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
 
     private Toolbar toolbar;
     private final static String url = "http://www.doofon.me/device/";
-    private static final String FILENAME = "data.txt";
+    private static final String FILENAME = "Serialnumber.txt";
     private final static int READ_BLOCK_SIZE = 100;
     private final UrlApi urlApi = new UrlApi();
     private final MyAlertDialog dialog = new MyAlertDialog();
@@ -50,7 +49,7 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         //Show DrawerLayout and drawerToggle
         this.initInstances();
 
-        if (isNetworkConnected()) {
+        if (MyNetwork.isNetworkConnected(this)) {
             this.readData();
             //LoadJSON
             new LoadJSON2().execute(urlApi.getUri());
@@ -72,22 +71,32 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         switch (id) {
             case R.id.nav_main:
                 finish();
+                overridePendingTransition(0, 0);
                 Intent intentDevice = new Intent(this, MainActivity.class);
                 startActivity(intentDevice);
                 break;
             case R.id.nav_DeviceProfile:
                 finish();
+                overridePendingTransition(0, 0);
                 startActivity(getIntent());
                 break;
             case R.id.nav_location:
                 finish();
+                overridePendingTransition(0, 0);
                 Intent intentLocation = new Intent(this, LocationActivity.class);
                 startActivity(intentLocation);
                 break;
             case R.id.nav_setting:
                 finish();
+                overridePendingTransition(0, 0);
                 Intent intentSettings = new Intent(this, SettingsActivity.class);
                 startActivity(intentSettings);
+                break;
+            case R.id.nav_mode:
+                finish();
+                overridePendingTransition(0, 0);
+                Intent intentMode = new Intent(this, ModeActivity.class);
+                startActivity(intentMode);
                 break;
             case R.id.nav_disconnect:
                 try {
@@ -124,8 +133,10 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
         else {
-            android.os.Process.killProcess(android.os.Process.myPid());
             finish();
+            overridePendingTransition(0, 0);
+            Intent intentDevice = new Intent(this, MainActivity.class);
+            startActivity(intentDevice);
             super.onBackPressed();
         }
     }
@@ -146,6 +157,7 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
+            overridePendingTransition(0, 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -168,12 +180,6 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
-    }
-
-    // Check Connect Network
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
     }
 
     // Read SerialNumber

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:padding="@dimen/activity_horizontal_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".SettingsActivity">
+    tools:context=".ModeActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -19,27 +19,40 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/editText"
+            android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="กำหนดค่าขั้นต่ำในการแจ้งเตือน"
-            android:textSize="16sp" />
+            android:padding="16dp"
+            android:text="Mode Predict Weather"
+            android:textAlignment="center"
+            android:textSize="24sp"
+            android:textStyle="normal|bold" />
 
-        <SeekBar
-            android:id="@+id/seek_Bar"
+        <RadioGroup
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="40dp"
-            android:max="100"
-            android:progress="70" />
+            android:layout_height="120dp"
+            android:padding="16dp">
 
-        <TextView
-            android:id="@+id/textView_seekBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="18sp" />
+            <RadioButton
+                android:id="@+id/radioButton1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="1 Hour"
+                android:textSize="18sp"
+                android:textStyle="normal|bold"
+                tools:text="1 Hour" />
+
+            <RadioButton
+                android:id="@+id/radioButton2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="2 Hour"
+                android:textSize="18sp"
+                android:textStyle="normal|bold"
+                tools:text="2 Hour" />
+        </RadioGroup>
 
         <Button
             android:id="@+id/button_saveThreshold"
@@ -48,10 +61,12 @@
             android:layout_gravity="bottom"
             android:layout_marginTop="24dp"
             android:background="@color/colorPrimaryDark"
+            android:onClick="onButtonSave1"
             android:text="@string/saveThreshold"
             android:textColor="@color/colorTextBase"
             android:textSize="18sp" />
 
     </LinearLayout>
+
 
 </RelativeLayout>

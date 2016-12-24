@@ -1,9 +1,10 @@
 package me.pr3a.localweather;
 
-import android.content.Context;
+//import android.content.Context;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.net.ConnectivityManager;
+//import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -35,6 +36,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import me.pr3a.localweather.Helper.MyAlertDialog;
+import me.pr3a.localweather.Helper.MyNetwork;
 import me.pr3a.localweather.Helper.UrlApi;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -50,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView weatherIcon;
     private static final String url1 = "http://www.doofon.me/weather/";
     private static final String url2 = "http://www.doofon.me/device/update/FCMtoken";
-    private static final String FILENAME = "data.txt";
+    private static final String FILENAME = "Serialnumber.txt";
     private final static int READ_BLOCK_SIZE = 100;
     private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
@@ -110,22 +112,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (id) {
             case R.id.nav_main:
                 finish();
+                overridePendingTransition(0, 0);
                 startActivity(getIntent());
                 break;
             case R.id.nav_DeviceProfile:
                 finish();
+                overridePendingTransition(0, 0);
                 Intent intentDevice = new Intent(this, DeviceActivity.class);
                 startActivity(intentDevice);
                 break;
             case R.id.nav_location:
                 finish();
+                overridePendingTransition(0, 0);
                 Intent intentLocation = new Intent(this, LocationActivity.class);
                 startActivity(intentLocation);
                 break;
             case R.id.nav_setting:
                 finish();
+                overridePendingTransition(0, 0);
                 Intent intentSettings = new Intent(this, SettingsActivity.class);
                 startActivity(intentSettings);
+                break;
+            case R.id.nav_mode:
+                finish();
+                overridePendingTransition(0, 0);
+                Intent intentMode = new Intent(this, ModeActivity.class);
+                startActivity(intentMode);
                 break;
             case R.id.nav_disconnect:
                 this.updateToken(urlApi2.getApikey(), "0");
@@ -164,7 +176,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             drawer.closeDrawer(GravityCompat.START);
         else {
             android.os.Process.killProcess(android.os.Process.myPid());
-            finish();
+            System.exit(0);
+            overridePendingTransition(0, 0);
+            //finish();
             super.onBackPressed();
         }
     }
@@ -180,12 +194,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             writer.close();
 
             Toast.makeText(this, "Disconnect Device", Toast.LENGTH_SHORT).show();
+            //Restart APP
             Intent i = getBaseContext().getPackageManager().getLaunchIntentForPackage(getBaseContext().getPackageName());
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP
                     | Intent.FLAG_ACTIVITY_CLEAR_TASK
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
+            overridePendingTransition(0, 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -214,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Connect Load Json
     private void conLoadJSON(int choice) {
         // Check Network Connected
-        if (isNetworkConnected()) {
+        if (MyNetwork.isNetworkConnected(this)) {
             // choice 1 setTime
             if (choice == 1) {
                 TimerTask taskNew = new TimerTask() {
@@ -235,17 +251,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // Check Connect Network
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
-    }
-
     // Update Token FCM
-    private void updateToken(String Apikey, String token) {
+    private void updateToken(String apiKey, String token) {
         try {
             RequestBody formBody = new FormBody.Builder()
-                    .add("SerialNumber", Apikey + "")
+                    .add("SerialNumber", apiKey + "")
                     .add("FCMtoken", token + "")
                     .add("sid", sid)
                     .build();
@@ -266,7 +276,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         throw new IOException("Unexpected code " + response);
                 }
             });
-            Toast.makeText(this, "UPDATE Token", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "UPDATE Token", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -406,10 +416,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 statusUpdate.setText(String.format("Last update %s", updated_at));
                 weatherTemp.setText(String.format("%s ℃", tempDouble));
-                weatherHumidity.setText(String.format("Humidity: %s %%", humidity));
-                weatherPressure.setText(String.format("Pressure: %s", pressure));
-                weatherDewPoint.setText(String.format("DewPoint: %s ℃", dewPoint));
-                weatherLight.setText(String.format("Light: %s", light));
+                weatherHumidity.setText(String.format("        %s %%", humidity));
+                weatherPressure.setText(String.format("        %s hPa", pressure));
+                weatherDewPoint.setText(String.format("%s ℃", dewPoint));
+                weatherLight.setText(String.format("%s", light));
                 if ((probabilityRain != null) && (!(probabilityRain.equals(""))) && (!(probabilityRain.equals("null")))) {
                     weatherProbabilityRain.setText(String.format("Probability Rain: %s %%", probabilityRain));
                 }
@@ -422,6 +432,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 dialog.showProblemDialog(MainActivity.this, "Problem", "Program Stop");
                 e.printStackTrace();
             }
+           /* if (PD.isShowing()) {
+                PD.dismiss();
+            }*/
         }
     }
 }

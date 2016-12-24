@@ -51,4 +51,7 @@
     <string name="header_location">Device location</string>
     <string name="header_main">Main</string>
     <string name="drawer_predictthreshold">Predict Threshold</string>
+    <string name="button_Barcode">Read QR-Code</string>
+    <string name="text_setting">Setting minimum alert</string>
+    <string name="mode">Mode</string>
 </resources>

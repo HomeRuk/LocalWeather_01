@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,39 +35,37 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class SettingsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ModeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private Toolbar toolbar;
     private final static String FILENAME = "Serialnumber.txt";
     private final static String url1 = "http://www.doofon.me/device/";
-    private final static String url2 = "http://www.doofon.me/device/update/threshold";
+    private final static String url2 = "http://www.doofon.me/device/update/mode";
     private final UrlApi urlApi1 = new UrlApi();
     private final UrlApi urlApi2 = new UrlApi();
     private final static int READ_BLOCK_SIZE = 100;
     private final MyAlertDialog dialog = new MyAlertDialog();
-    private TextView txtSeekBar;
-    private SeekBar seekBar;
-    private int progressChanged = 0;
+    private int mode = 1;
     private String sid = "Ruk";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(R.layout.activity_mode);
+
         //Display Toolbar
-        this.showToolbar("Setting", "Predict Threshold");
+        this.showToolbar("Setting Mode", "Mode Prediction");
         //Show DrawerLayout and drawerToggle
         this.initInstances();
 
-        txtSeekBar = (TextView) findViewById(R.id.textView_seekBar);
+
         if (MyNetwork.isNetworkConnected(this)) {
             this.readData();
             new LoadJSON2().execute(urlApi1.getUri());
         } else {
-            dialog.showProblemDialog(SettingsActivity.this, "Problem", "Not Connected Network");
+            dialog.showProblemDialog(ModeActivity.this, "Problem", "Not Connected Network");
         }
 
-        this.onSeekBar();
     }
 
     // Select Menu Navigation
@@ -98,13 +97,13 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
             case R.id.nav_setting:
                 finish();
                 overridePendingTransition(0, 0);
-                startActivity(getIntent());
+                Intent intentSetting = new Intent(this, SettingsActivity.class);
+                startActivity(intentSetting);
                 break;
             case R.id.nav_mode:
                 finish();
                 overridePendingTransition(0, 0);
-                Intent intentMode = new Intent(this, ModeActivity.class);
-                startActivity(intentMode);
+                startActivity(getIntent());
                 break;
             case R.id.nav_disconnect:
                 try {
@@ -133,7 +132,6 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
     //Button back
     @Override
@@ -172,61 +170,49 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         }
     }
 
+
     // Button Save threshold
-    public void onButtonSave(View view) {
-        //Check serial is not empty
-        if (progressChanged != 0) {
-            //Check Connect network
-            if (MyNetwork.isNetworkConnected(this)) {
-                view.setEnabled(false);
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        Log.d("APP", "doInBackground");
-                        try {
-                            RequestBody formBody = new FormBody.Builder()
-                                    .add("SerialNumber", urlApi2.getApikey())
-                                    .add("threshold", progressChanged + "")
-                                    .add("sid", sid)
-                                    .build();
-                            Request request = new Request.Builder()
-                                    .url(urlApi2.getUrl())
-                                    .post(formBody)
-                                    .build();
-                            OkHttpClient okHttpClient = new OkHttpClient();
-                            okHttpClient.newCall(request).execute();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            dialog.showProblemDialog(SettingsActivity.this, "Problem", "Save Fail");
-                        }
-                        return null;
+    public void onButtonSave1(View view) {
+        RadioButton radio1 = (RadioButton) findViewById(R.id.radioButton1);
+        RadioButton radio2 = (RadioButton) findViewById(R.id.radioButton2);
+        if (radio1.isChecked()) {
+            mode = 1;
+        } else if (radio2.isChecked()) {
+            mode = 2;
+        }
+
+        //Check Connect network
+        if (MyNetwork.isNetworkConnected(this)) {
+            view.setEnabled(false);
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    Log.d("APP", "doInBackground");
+                    try {
+                        RequestBody formBody = new FormBody.Builder()
+                                .add("SerialNumber", urlApi2.getApikey())
+                                .add("mode", mode + "")
+                                .add("sid", sid)
+                                .build();
+                        Request request = new Request.Builder()
+                                .url(urlApi2.getUrl())
+                                .post(formBody)
+                                .build();
+                        OkHttpClient okHttpClient = new OkHttpClient();
+                        okHttpClient.newCall(request).execute();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        dialog.showProblemDialog(ModeActivity.this, "Problem", "Save Fail");
                     }
-                }.execute();
-                dialog.showConnectDialog(SettingsActivity.this, "Save", "Success");
-                view.setEnabled(true);
-            } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
-        } else Toast.makeText(this, "Please Select threshold", Toast.LENGTH_SHORT).show();
+                    return null;
+                }
+            }.execute();
+            dialog.showConnectDialog(ModeActivity.this, "Save", "Success");
+            view.setEnabled(true);
+        } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+
     }
 
-    // SeekBar
-    private void onSeekBar() {
-        seekBar = (SeekBar) findViewById(R.id.seek_Bar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progressChanged = progress;
-                txtSeekBar.setText("Threshold : " + progressChanged + "%");
-            }
-
-            public void onStartTrackingTouch(SeekBar seekBar) {
-                // TODO Auto-generated method stub
-            }
-
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                Toast.makeText(SettingsActivity.this, "Threshold : " + progressChanged + "%", Toast.LENGTH_SHORT).show();
-                System.out.println(progressChanged);
-            }
-        });
-    }
 
     // Show Toolbar
     private void showToolbar(String title, String subTitle) {
@@ -284,6 +270,8 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
 
     // AsyncTask Load Data Device
     private class LoadJSON2 extends AsyncTask<String, Void, String> {
+        private final RadioButton radio1 = (RadioButton) findViewById(R.id.radioButton1);
+        private final RadioButton radio2 = (RadioButton) findViewById(R.id.radioButton2);
 
         @Override
         protected String doInBackground(String... urls) {
@@ -309,13 +297,21 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
             super.onPostExecute(result);
             try {
                 JSONObject json = new JSONObject(result);
-                String threshold = String.format("%s", json.getString("threshold"));
-                txtSeekBar.setText(String.format("Threshold : %s", threshold));
-                seekBar.setProgress(Integer.parseInt(threshold));
+                String mode = String.format("%s", json.getString("mode"));
+                //dialog.showProblemDialog(ModeActivity.this, "Problem", mode);
+
+                if (mode.equals("1")) {
+                    radio1.setChecked(true);
+                    System.out.println(mode + ".....");
+                } else if (mode.equals("2")) {
+                    radio2.setChecked(true);
+                    System.out.println(mode + "######");
+                }
             } catch (Exception e) {
-                dialog.showProblemDialog(SettingsActivity.this, "Problem", "Not Connected Internet");
+                dialog.showProblemDialog(ModeActivity.this, "Problem", "Not Connected Internet2");
                 e.printStackTrace();
             }
         }
     }
+
 }

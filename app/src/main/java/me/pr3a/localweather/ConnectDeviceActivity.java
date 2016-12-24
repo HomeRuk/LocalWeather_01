@@ -1,10 +1,10 @@
 package me.pr3a.localweather;
 
-import android.content.Context;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+//import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+//import android.support.v4.app.ActivityCompat;
+//import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 
+import me.pr3a.localweather.Helper.MyNetwork;
 import me.pr3a.localweather.Helper.UrlApi;
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import okhttp3.OkHttpClient;
@@ -29,8 +30,9 @@ public class ConnectDeviceActivity extends AppCompatActivity {
     private UrlApi urlApi = new UrlApi();
     private MyAlertDialog dialog = new MyAlertDialog();
     private String serial;
-    private final static String FILENAME = "data.txt";
+    private final static String FILENAME = "Serialnumber.txt";
     private final static String url = "http://www.doofon.me/device/";
+    private static final int ZXING_CAMERA_PERMISSION = 1;
     EditText editSerial;
 
     @Override
@@ -39,13 +41,13 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         setContentView(R.layout.activity_connect_device);
 
         bindWidgets();
-    }
 
-    // Check Connect Network
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
+        /*String Ccontent;
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            Ccontent = bundle.getString("C_content");
+            editSerial.setText(Ccontent);
+        }*/
     }
 
     private void bindWidgets() {
@@ -57,7 +59,7 @@ public class ConnectDeviceActivity extends AppCompatActivity {
         serial = editSerial.getText().toString();
         if (!serial.isEmpty()) {
             //Check Connect network
-            if (isNetworkConnected()) {
+            if (MyNetwork.isNetworkConnected(this)) {
                 //Set url & LoadJSON
                 urlApi.setUri(url, serial);
                 new LoadJSON1().execute(urlApi.getUri());
@@ -67,8 +69,23 @@ public class ConnectDeviceActivity extends AppCompatActivity {
             Toast.makeText(ConnectDeviceActivity.this, "Please fill in Serial Number", Toast.LENGTH_SHORT).show();
     }
 
+    // Button Connect
+    public void onButtonBarcode(View view) {
+        /*if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA}, ZXING_CAMERA_PERMISSION);
+        } else {
+            finish();
+            Intent intentBarcode = new Intent(this, ScannerActivity.class);
+            startActivity(intentBarcode);
+        }*/
+        finish();
+        overridePendingTransition(0, 0);
+        Intent intentBarcode = new Intent(this, ScannerActivity.class);
+        startActivity(intentBarcode);
+    }
+
     // AsyncTask Load Data Device
-    private class LoadJSON1 extends AsyncTask<String, Void, String> {
+    public class LoadJSON1 extends AsyncTask<String, Void, String> {
 
         @Override
         protected String doInBackground(String... urls) {
@@ -101,7 +118,7 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                         //Writer Data Serial
                         FileOutputStream fOut = openFileOutput(FILENAME, MODE_PRIVATE);
                         OutputStreamWriter writer = new OutputStreamWriter(fOut);
-                        writer.write(serial);
+                        writer.write(Serial);
                         writer.flush();
                         writer.close();
                     } catch (IOException ioe) {
@@ -109,10 +126,11 @@ public class ConnectDeviceActivity extends AppCompatActivity {
                         ioe.printStackTrace();
                     }
                     Toast.makeText(ConnectDeviceActivity.this, "Save successfully!", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(ConnectDeviceActivity.this, MainActivity.class);
-                    intent.putExtra("Data_SerialNumber", Serial);
-                    startActivity(intent);
                     finish();
+                    overridePendingTransition(0, 0);
+                    Intent intent = new Intent(ConnectDeviceActivity.this, MainActivity.class);
+                    //intent.putExtra("Data_SerialNumber", Serial);
+                    startActivity(intent);
                 }
             } catch (Exception e) {
                 try {

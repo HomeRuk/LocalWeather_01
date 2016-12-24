@@ -39,4 +39,25 @@ public class MyAlertDialog {
             }
         }).show();
     }
+
+    /*
+    public void confirmConnectDialog(Context context, String title, String message) {
+
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+        dialog.setTitle(title);
+        dialog.setMessage(message);
+        dialog.setIcon(R.drawable.ic_home_black_24dp);
+        dialog.setCancelable(false);
+        dialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+
+            }
+        });
+        dialog.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        }).show();
+    }
+    */
 }

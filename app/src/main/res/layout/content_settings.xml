@@ -23,7 +23,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="กำหนดค่าขั้นต่ำในการแจ้งเตือน"
+            android:text="@string/text_setting"
             android:textSize="16sp" />
 
         <SeekBar

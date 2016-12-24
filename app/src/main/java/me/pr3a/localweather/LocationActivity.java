@@ -1,9 +1,7 @@
 package me.pr3a.localweather;
 
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.net.ConnectivityManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +21,7 @@ import io.nlopez.smartlocation.OnLocationUpdatedListener;
 import io.nlopez.smartlocation.SmartLocation;
 import io.nlopez.smartlocation.location.providers.LocationGooglePlayServicesWithFallbackProvider;
 import me.pr3a.localweather.Helper.MyAlertDialog;
+import me.pr3a.localweather.Helper.MyNetwork;
 import me.pr3a.localweather.Helper.UrlApi;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -66,7 +65,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
     private double longitude = 0;
     private String Serial = "Device ";
     private String sid = "Ruk";
-    private static final String FILENAME = "data.txt";
+    private static final String FILENAME = "Serialnumber.txt";
     private final static String FILENAME2 = "location.txt";
     private final static String url1 = "http://www.doofon.me/device/";
     private final static String url2 = "http://www.doofon.me/device/update/location";
@@ -78,7 +77,6 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        Log.i("APP", "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
         //Display Toolbar
@@ -86,7 +84,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         //Show DrawerLayout and drawerToggle
         this.initInstances();
 
-        if (isNetworkConnected()) {
+        if (MyNetwork.isNetworkConnected(this)) {
             //Read SerialNumber
             this.readData();
             //Load SerialNumber
@@ -119,6 +117,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             // SET MAP
             this.setMap();
         } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+        //Log.i("APP", "onCreate");
     }
 
     // Activity onStart is Rule Start Service Location
@@ -149,6 +148,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         Log.i("APP", "onRequestPermissionsResult");
         if (requestCode == LOCATION_PERMISSION_ID && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             finish();
+            overridePendingTransition(0, 0);
             startActivity(getIntent());
         }
     }
@@ -199,10 +199,11 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         if (id == R.id.action_refresh) {
             Toast.makeText(this, "Refresh Location", Toast.LENGTH_SHORT).show();
             finish();
+            overridePendingTransition(0, 0);
             startActivity(getIntent());
         } else if (id == R.id.action_save) {
             //Check Connect network
-            if (isNetworkConnected()) {
+            if (MyNetwork.isNetworkConnected(this)) {
                 this.saveLocation();
             } else dialog.showProblemDialog(this, "Problem", "Not Connected Network");
         }
@@ -219,22 +220,32 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         switch (id) {
             case R.id.nav_main:
                 finish();
-                Intent intentDevice = new Intent(this, MainActivity.class);
-                startActivity(intentDevice);
+                overridePendingTransition(0, 0);
+                Intent intentMain = new Intent(this, MainActivity.class);
+                startActivity(intentMain);
                 break;
             case R.id.nav_DeviceProfile:
                 finish();
-                Intent intentLocation = new Intent(this, DeviceActivity.class);
-                startActivity(intentLocation);
+                overridePendingTransition(0, 0);
+                Intent intentDevice = new Intent(this, DeviceActivity.class);
+                startActivity(intentDevice);
                 break;
             case R.id.nav_location:
                 finish();
+                overridePendingTransition(0, 0);
                 startActivity(getIntent());
                 break;
             case R.id.nav_setting:
                 finish();
+                overridePendingTransition(0, 0);
                 Intent intentSettings = new Intent(this, SettingsActivity.class);
                 startActivity(intentSettings);
+                break;
+            case R.id.nav_mode:
+                finish();
+                overridePendingTransition(0, 0);
+                Intent intentMode = new Intent(this, ModeActivity.class);
+                startActivity(intentMode);
                 break;
             case R.id.nav_disconnect:
                 try {
@@ -264,12 +275,6 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         return true;
     }
 
-    // Check Connect Network
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        return cm.getActiveNetworkInfo() != null;
-    }
-
     // Button back
     @Override
     public void onBackPressed() {
@@ -277,8 +282,10 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         if (drawer.isDrawerOpen(GravityCompat.START))
             drawer.closeDrawer(GravityCompat.START);
         else {
-            android.os.Process.killProcess(android.os.Process.myPid());
             finish();
+            overridePendingTransition(0, 0);
+            Intent intentDevice = new Intent(this, MainActivity.class);
+            startActivity(intentDevice);
             super.onBackPressed();
         }
     }
@@ -299,6 +306,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
                     | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
             finish();
+            overridePendingTransition(0, 0);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -326,6 +334,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
         } else Log.e("APP", "StartLocation fail");
     }
 
+    /*
     // Show Current Location (Latitude,Longitude)
     private void showLocation(final Location location) {
         Log.i("APP", "showLocation");
@@ -338,6 +347,7 @@ public class LocationActivity extends AppCompatActivity implements OnLocationUpd
             Toast.makeText(this, "Null location", Toast.LENGTH_SHORT).show();
         }
     }
+    */
 
     // Show Toolbar
     private void showToolbar(String title, String subTitle) {

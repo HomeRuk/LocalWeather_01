@@ -1,10 +1,7 @@
 package me.pr3a.localweather;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
@@ -21,6 +18,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
 import me.pr3a.localweather.Helper.MyAlertDialog;
+import me.pr3a.localweather.Helper.MyNetwork;
 import me.pr3a.localweather.Helper.UrlApi;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -30,7 +28,7 @@ public class LogoActivity extends AppCompatActivity {
 
     private final UrlApi urlApi = new UrlApi();
     private final MyAlertDialog dialog = new MyAlertDialog();
-    private final static String FILENAME = "data.txt";
+    private final static String FILENAME = "Serialnumber.txt";
     private final static String url = "http://128.199.210.91/device/";
     private final static int READ_BLOCK_SIZE = 100;
 
@@ -45,7 +43,7 @@ public class LogoActivity extends AppCompatActivity {
         weatherIcon.setTypeface(weatherFont);
         weatherIcon.setText(getString(R.string.weather_rain));
 
-        if (isNetworkConnected()) {
+        if (MyNetwork.isNetworkConnected(this)) {
             readData();
         } else {
             dialog.showProblemDialog(LogoActivity.this, "Problem", "Not Connected Network");
@@ -99,13 +97,6 @@ public class LogoActivity extends AppCompatActivity {
                 finish();
             }
         }, 1500);
-    }
-
-    // Check Connect Network
-    private boolean isNetworkConnected() {
-        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = cm.getActiveNetworkInfo();
-        return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
     // AsyncTask Load Data Device
