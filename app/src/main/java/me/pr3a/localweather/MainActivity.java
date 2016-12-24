@@ -1,6 +1,7 @@
 package me.pr3a.localweather;
 
 //import android.content.Context;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Typeface;
@@ -10,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -46,10 +48,11 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 
     private Toolbar toolbar;
     private TextView weatherIcon;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private static final String url1 = "http://www.doofon.me/weather/";
     private static final String url2 = "http://www.doofon.me/device/update/FCMtoken";
     private static final String FILENAME = "Serialnumber.txt";
@@ -80,8 +83,32 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         String token = FirebaseInstanceId.getInstance().getToken();
         Log.d("TOKEN", "=" + token);
         this.updateToken(urlApi2.getApikey(), token);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
+        /**
+         * Showing Swipe Refresh animation on activity create
+         * As animation won't start on onCreate, post runnable is used
+         */
+        swipeRefreshLayout.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        swipeRefreshLayout.setRefreshing(true);
+                                        conLoadJSON(1);
+                                    }
+                                }
+        );
+    }
+
+    /**
+     * This method is called when swipe refresh is pulled down
+     */
+    @Override
+    public void onRefresh() {
         // Connect loadJson choice 1 setTime
-        this.conLoadJSON(1);
+        this.conLoadJSON(0);
+        Toast.makeText(this, "Refresh Weather", Toast.LENGTH_SHORT).show();
     }
 
     // Create MenuBar on Toolbar
@@ -96,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            conLoadJSON(0);
+            this.conLoadJSON(0);
             Toast.makeText(this, "Refresh Weather", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
@@ -231,6 +258,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void conLoadJSON(int choice) {
         // Check Network Connected
         if (MyNetwork.isNetworkConnected(this)) {
+            // showing refresh animation before making http call
+            swipeRefreshLayout.setRefreshing(true);
             // choice 1 setTime
             if (choice == 1) {
                 TimerTask taskNew = new TimerTask() {
@@ -249,6 +278,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             dialog.showProblemDialog(this, "Problem", "Not Connected Network");
         }
+        // stopping swipe refresh
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     // Update Token FCM

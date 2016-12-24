@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,8 +15,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.RadioButton;
-import android.widget.SeekBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONObject;
@@ -35,9 +34,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class ModeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ModeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 
     private Toolbar toolbar;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private final static String FILENAME = "Serialnumber.txt";
     private final static String url1 = "http://www.doofon.me/device/";
     private final static String url2 = "http://www.doofon.me/device/update/mode";
@@ -58,14 +58,32 @@ public class ModeActivity extends AppCompatActivity implements NavigationView.On
         //Show DrawerLayout and drawerToggle
         this.initInstances();
 
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
+        swipeRefreshLayout.setOnRefreshListener(this);
 
-        if (MyNetwork.isNetworkConnected(this)) {
-            this.readData();
-            new LoadJSON2().execute(urlApi1.getUri());
-        } else {
-            dialog.showProblemDialog(ModeActivity.this, "Problem", "Not Connected Network");
-        }
+        /**
+         * Showing Swipe Refresh animation on activity create
+         * As animation won't start on onCreate, post runnable is used
+         */
+        swipeRefreshLayout.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        swipeRefreshLayout.setRefreshing(true);
+                                        conLoadJSON();
+                                    }
+                                }
+        );
 
+    }
+
+    /**
+     * This method is called when swipe refresh is pulled down
+     */
+    @Override
+    public void onRefresh() {
+        // Connect loadJson choice 1 setTime
+        this.conLoadJSON();
+        Toast.makeText(this, "Refresh Mode Prediction", Toast.LENGTH_SHORT).show();
     }
 
     // Select Menu Navigation
@@ -233,6 +251,22 @@ public class ModeActivity extends AppCompatActivity implements NavigationView.On
         drawerToggle.syncState();
     }
 
+    // Connect Load Json
+    private void conLoadJSON() {
+        // Check Network Connected
+        if (MyNetwork.isNetworkConnected(this)) {
+            // showing refresh animation before making http call
+            swipeRefreshLayout.setRefreshing(true);
+            //readData Serialnumber
+            this.readData();
+            //LoadJSON
+            new LoadJSON2().execute(urlApi1.getUri());
+        } else {
+            dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+        }
+        // stopping swipe refresh
+        swipeRefreshLayout.setRefreshing(false);
+    }
     //Read SerialNumber
     private void readData() {
         try {

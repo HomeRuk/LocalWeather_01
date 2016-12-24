@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,9 +32,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class DeviceActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class DeviceActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 
     private Toolbar toolbar;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private final static String url = "http://www.doofon.me/device/";
     private static final String FILENAME = "Serialnumber.txt";
     private final static int READ_BLOCK_SIZE = 100;
@@ -59,6 +61,32 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         /*SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy:MM:dd");
         dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT+7"));
         System.out.println(dateFormatGmt.format(new Date()) + "");*/
+
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
+        swipeRefreshLayout.setOnRefreshListener(this);
+
+        /**
+         * Showing Swipe Refresh animation on activity create
+         * As animation won't start on onCreate, post runnable is used
+         */
+        swipeRefreshLayout.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        swipeRefreshLayout.setRefreshing(true);
+                                        conLoadJSON();
+                                    }
+                                }
+        );
+    }
+
+    /**
+     * This method is called when swipe refresh is pulled down
+     */
+    @Override
+    public void onRefresh() {
+        // Connect loadJson choice 1 setTime
+        this.conLoadJSON();
+        Toast.makeText(this, "Refresh Detail Device", Toast.LENGTH_SHORT).show();
     }
 
     // Select Menu Navigation
@@ -180,6 +208,23 @@ public class DeviceActivity extends AppCompatActivity implements NavigationView.
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
+    }
+
+    // Connect Load Json
+    private void conLoadJSON() {
+        // Check Network Connected
+        if (MyNetwork.isNetworkConnected(this)) {
+            // showing refresh animation before making http call
+            swipeRefreshLayout.setRefreshing(true);
+            //readData Serialnumber
+            this.readData();
+            //LoadJSON
+            new LoadJSON2().execute(urlApi.getUri());
+        } else {
+            dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+        }
+        // stopping swipe refresh
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     // Read SerialNumber

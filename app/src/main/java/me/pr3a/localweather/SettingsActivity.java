@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,9 +35,10 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class SettingsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class SettingsActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SwipeRefreshLayout.OnRefreshListener {
 
     private Toolbar toolbar;
+    private SwipeRefreshLayout swipeRefreshLayout;
     private final static String FILENAME = "Serialnumber.txt";
     private final static String url1 = "http://www.doofon.me/device/";
     private final static String url2 = "http://www.doofon.me/device/update/threshold";
@@ -59,14 +61,32 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         this.initInstances();
 
         txtSeekBar = (TextView) findViewById(R.id.textView_seekBar);
-        if (MyNetwork.isNetworkConnected(this)) {
-            this.readData();
-            new LoadJSON2().execute(urlApi1.getUri());
-        } else {
-            dialog.showProblemDialog(SettingsActivity.this, "Problem", "Not Connected Network");
-        }
-
+        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
+        swipeRefreshLayout.setOnRefreshListener(this);
+        /**
+         * Showing Swipe Refresh animation on activity create
+         * As animation won't start on onCreate, post runnable is used
+         */
+        swipeRefreshLayout.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        swipeRefreshLayout.setRefreshing(true);
+                                        conLoadJSON();
+                                    }
+                                }
+        );
+        //Show SeekBar
         this.onSeekBar();
+    }
+
+    /**
+     * This method is called when swipe refresh is pulled down
+     */
+    @Override
+    public void onRefresh() {
+        // Connect loadJson choice 1 setTime
+        this.conLoadJSON();
+        Toast.makeText(this, "Refresh Setting Threshold", Toast.LENGTH_SHORT).show();
     }
 
     // Select Menu Navigation
@@ -133,7 +153,6 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
 
     //Button back
     @Override
@@ -223,7 +242,6 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
 
             public void onStopTrackingTouch(SeekBar seekBar) {
                 Toast.makeText(SettingsActivity.this, "Threshold : " + progressChanged + "%", Toast.LENGTH_SHORT).show();
-                System.out.println(progressChanged);
             }
         });
     }
@@ -245,6 +263,22 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         ActionBarDrawerToggle drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawerLayout.addDrawerListener(drawerToggle);
         drawerToggle.syncState();
+    }
+
+    // Connect Load Json
+    private void conLoadJSON() {
+        // Check Network Connected
+        if (MyNetwork.isNetworkConnected(this)) {
+            // showing refresh animation before making http call
+            swipeRefreshLayout.setRefreshing(true);
+            //readData Serialnumber
+            this.readData();
+            new LoadJSON2().execute(urlApi1.getUri());
+        } else {
+            dialog.showProblemDialog(this, "Problem", "Not Connected Network");
+        }
+        // stopping swipe refresh
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     //Read SerialNumber
@@ -310,7 +344,7 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
             try {
                 JSONObject json = new JSONObject(result);
                 String threshold = String.format("%s", json.getString("threshold"));
-                txtSeekBar.setText(String.format("Threshold : %s", threshold));
+                txtSeekBar.setText(String.format("Threshold : %s %%", threshold));
                 seekBar.setProgress(Integer.parseInt(threshold));
             } catch (Exception e) {
                 dialog.showProblemDialog(SettingsActivity.this, "Problem", "Not Connected Internet");

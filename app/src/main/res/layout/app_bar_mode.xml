@@ -14,10 +14,16 @@
         android:layout_height="?attr/actionBarSize"
         app:theme="@style/ToolBarStyle" />
 
-    <include
-        layout="@layout/content_mode"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+
+        <include
+            layout="@layout/content_mode"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 </android.support.design.widget.AppBarLayout>
 
 
