@@ -21,6 +21,19 @@ android {
     dexOptions {
         javaMaxHeapSize "2g"
     }
+    sourceSets {
+        main {
+            res.srcDirs =
+                    [
+                            'src/main/res/layouts/activities',
+                            'src/main/res/layouts/appbar',
+                            'src/main/res/layouts/content',
+                            'src/main/res/layouts/navheader',
+                            'src/main/res/layouts',
+                            'src/main/res'
+                    ]
+        }
+    }
 }
 
 dependencies {
