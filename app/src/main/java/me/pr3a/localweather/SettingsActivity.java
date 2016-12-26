@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 
+import at.grabner.circleprogress.CircleProgressView;
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import me.pr3a.localweather.Helper.MyNetwork;
 import me.pr3a.localweather.Helper.UrlApi;
@@ -46,9 +47,11 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
     private final UrlApi urlApi2 = new UrlApi();
     private final static int READ_BLOCK_SIZE = 100;
     private final MyAlertDialog dialog = new MyAlertDialog();
-    private TextView txtSeekBar;
-    private SeekBar seekBar;
-    private int progressChanged = 0;
+    private TextView txtValue;
+    //private SeekBar seekBar;
+    private CircleProgressView mCircleView;
+    //private int progressChanged = 0;
+    private int valueInt = 0 ;
     private String sid = "Ruk";
 
     @Override
@@ -60,7 +63,7 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         //Show DrawerLayout and drawerToggle
         this.initInstances();
 
-        txtSeekBar = (TextView) findViewById(R.id.textView_seekBar);
+        txtValue = (TextView) findViewById(R.id.textView_seekBar);
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.refresh);
         swipeRefreshLayout.setOnRefreshListener(this);
         /**
@@ -75,8 +78,11 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
                                     }
                                 }
         );
+
+        this.onCircleView();
+
         //Show SeekBar
-        this.onSeekBar();
+        //this.onSeekBar();
     }
 
     /**
@@ -194,7 +200,7 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
     // Button Save threshold
     public void onButtonSave(View view) {
         //Check serial is not empty
-        if (progressChanged != 0) {
+        if (valueInt != 0) {
             //Check Connect network
             if (MyNetwork.isNetworkConnected(this)) {
                 view.setEnabled(false);
@@ -205,7 +211,7 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
                         try {
                             RequestBody formBody = new FormBody.Builder()
                                     .add("SerialNumber", urlApi2.getApikey())
-                                    .add("threshold", progressChanged + "")
+                                    .add("threshold", valueInt + "")
                                     .add("sid", sid)
                                     .build();
                             Request request = new Request.Builder()
@@ -227,6 +233,20 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
         } else Toast.makeText(this, "Please Select threshold", Toast.LENGTH_SHORT).show();
     }
 
+    // mCircleView
+    private void onCircleView(){
+        mCircleView = (CircleProgressView) findViewById(R.id.circleView);
+        mCircleView.setOnProgressChangedListener(new CircleProgressView.OnProgressChangedListener() {
+            @Override
+            public void onProgressChanged(float value) {
+                valueInt = Math.round(value);
+                txtValue.setText("Threshold : " + valueInt + " %");
+                //seekBar.setProgress(valueInt);
+            }
+        });
+    }
+
+/*
     // SeekBar
     private void onSeekBar() {
         seekBar = (SeekBar) findViewById(R.id.seek_Bar);
@@ -234,6 +254,7 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 progressChanged = progress;
                 txtSeekBar.setText("Threshold : " + progressChanged + "%");
+                mCircleView.setValueAnimated(progressChanged, 1500);
             }
 
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -241,11 +262,12 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
             }
 
             public void onStopTrackingTouch(SeekBar seekBar) {
+                mCircleView.setValueAnimated(seekBar.getProgress(), 15);
                 Toast.makeText(SettingsActivity.this, "Threshold : " + progressChanged + "%", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
+*/
     // Show Toolbar
     private void showToolbar(String title, String subTitle) {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -344,8 +366,9 @@ public class SettingsActivity extends AppCompatActivity implements NavigationVie
             try {
                 JSONObject json = new JSONObject(result);
                 String threshold = String.format("%s", json.getString("threshold"));
-                txtSeekBar.setText(String.format("Threshold : %s %%", threshold));
-                seekBar.setProgress(Integer.parseInt(threshold));
+                txtValue.setText(String.format("Threshold : %s %%", threshold));
+                //seekBar.setProgress(Integer.parseInt(threshold));
+                mCircleView.setValueAnimated(Integer.parseInt(threshold), 1500);
             } catch (Exception e) {
                 dialog.showProblemDialog(SettingsActivity.this, "Problem", "Not Connected Internet");
                 e.printStackTrace();
