@@ -37,6 +37,7 @@ import java.io.OutputStreamWriter;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import me.itangqi.waveloadingview.WaveLoadingView;
 import me.pr3a.localweather.Helper.MyAlertDialog;
 import me.pr3a.localweather.Helper.MyNetwork;
 import me.pr3a.localweather.Helper.UrlApi;
@@ -357,7 +358,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         private final TextView weatherPressure = (TextView) findViewById(R.id.weather_pressure);
         private final TextView weatherDewPoint = (TextView) findViewById(R.id.weather_dewpoint);
         private final TextView weatherLight = (TextView) findViewById(R.id.weather_light);
-        private final TextView weatherProbabilityRain = (TextView) findViewById(R.id.weather_probabilityRain);
+        //private final TextView weatherProbabilityRain = (TextView) findViewById(R.id.weather_probabilityRain);
+        private final WaveLoadingView mWaveLoadingView = (WaveLoadingView) findViewById(R.id.waveLoadingView);
         //private final TextView deviceSerialNumber = (TextView) findViewById(R.id.main_serialNumber);
 
         private String temp = "";
@@ -416,12 +418,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (rainInt == 1) {
                     if (timeInt >= 6 && timeInt < 18) {
                         icon = getString(R.string.weather_day_rain);
-                        weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 120);
+                        //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 120);
                         weatherIcon.setText(icon);
                         weatherStatusName.setText(R.string.Text_Daytime_Rain);
                     } else {
                         icon = getString(R.string.weather_night_rain);
-                        weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 140);
+                        //weatherIcon.setTextSize(TypedValue.COMPLEX_UNIT_SP, 140);
                         weatherIcon.setText(icon);
                         weatherStatusName.setText(R.string.Text_Nighttime_Rain);
                     }
@@ -447,12 +449,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 statusUpdate.setText(String.format("Last update %s", updated_at));
                 weatherTemp.setText(String.format("%s ℃", tempDouble));
-                weatherHumidity.setText(String.format("        %s %%", humidity));
-                weatherPressure.setText(String.format("        %s hPa", pressure));
-                weatherDewPoint.setText(String.format("%s ℃", dewPoint));
-                weatherLight.setText(String.format("%s", light));
+                weatherHumidity.setText(String.format("%s %%", humidity.trim()));
+                weatherPressure.setText(String.format("%s hPa", pressure.trim()));
+                weatherDewPoint.setText(String.format("%s ℃", dewPoint.trim()));
+                weatherLight.setText(String.format("%s", light.trim()));
                 if ((probabilityRain != null) && (!(probabilityRain.equals(""))) && (!(probabilityRain.equals("null")))) {
-                    weatherProbabilityRain.setText(String.format("Probability Rain: %s %%", probabilityRain));
+                    //mWaveLoadingView.setTopTitle("Prob. Rain:");
+                    mWaveLoadingView.setCenterTitle(probabilityRain + " %");
+                    mWaveLoadingView.setProgressValue((int)Double.parseDouble(probabilityRain));
+                    //mWaveLoadingView.setAmplitudeRatio(Integer.parseInt(probabilityRain));
+                    //weatherProbabilityRain.setText(String.format("Probability Rain: %s %%", probabilityRain));
                 }
                 //deviceSerialNumber.setText(String.format("%s", SerialNumber));
 
